@@ -1,0 +1,236 @@
+/**
+ * @author Bilal Cinarli
+ * @auhtor Sevil Yilmaz
+ */
+
+jQuery(function($){
+    /*var process = '<div class="process"></div>';
+
+    $(document).ajaxStart(function(){
+        $('body').append(process);
+    });
+
+    $(document).ajaxStop(function(){
+       $('.process').remove();
+    });*/
+
+    var TGY = {
+        obj: {
+            plugged : [
+                { func: 'tabview', target: '.tab-view'},
+                { func: 'tooltip', target: '.tooltip'}
+            ]
+        },
+
+        init: function(){
+            this.plugged();
+        },
+
+        plugged: function(){
+            $(this.obj.plugged).each(function(){
+                var e = this,
+                    p;
+
+                if(typeof $.fn[e.func] !== 'function') {
+                    return;
+                }
+
+                if(typeof e.params !== 'undefined'){
+                    p = e.params;
+                }
+
+                $(e.target)[e.func](p);
+            });
+        }
+    };
+
+    TGY.init();
+
+    $(document).on('click', 'a.modal', function(e){
+        e.preventDefault();
+        var url = $(this).attr('href');
+        $.colorbox({ href: url });
+    });
+
+    $(document).on('click', 'a.fixed-modal', function(e){
+        e.preventDefault();
+        var url = $(this).attr('href');
+        $.colorbox({ href: url, height:"90%"});
+    });
+
+
+    $('a[href^=http]').click(function () {
+        var a = new RegExp('/' + window.location.host + '/');
+        if (!a.test(this.href)) {
+            window.open(this.href);
+            return false;
+        }
+    });
+
+	$('.close').on('click',function(){
+        var self = $(this);
+        if(self.parent().hasClass('error-container')){
+           self.parent().slideUp();
+        }
+    });
+
+    // profil me sayfası için pagination yapısı
+    // $(".pager").hide();
+
+    var recordsPerPage = 5
+    var totalNumRecords = $(".tab-view-content:visible").find(".count").length;
+
+    if (recordsPerPage < totalNumRecords) {
+        pagination(recordsPerPage, totalNumRecords);
+    }
+
+    function pagination(recordsPerPage, totalNumRecords){
+        //Show the pagination controls
+        $(".pager").show();
+
+        //loop through all of the divs and hide them by default.
+        for (var i=1; i <= totalNumRecords; i++) {
+            $(".tab-view-content:visible").find(".rowCount-" + i).hide();
+        }
+
+        //then only display the number of divs the user dictated
+        for (var i = 1; i <= recordsPerPage; i++) {
+            $(".tab-view-content:visible").find(".rowCount-" + i).show();
+        }
+        //maxPages is the maximum amount of pages needed for pagination. (round up)
+        var maxPages = Math.ceil(totalNumRecords/recordsPerPage);
+
+        $('.pager').jqPagination({
+            link_string : '/?page={page_number}',
+            max_page     : maxPages,
+            paged        : function(page) {
+                //loop through all of the divs and hide them all.
+                for (var i=1; i <= totalNumRecords; i++) {
+                    $(".tab-view-content:visible").find(".rowCount-" + i).hide();
+                }
+
+                //Find the range of the records for the page:
+                var recordsFrom = recordsPerPage * (page-1) + 1;
+                var recordsTo = recordsPerPage * (page);
+
+                //then display only the records on the specified page
+                for (var i = recordsFrom; i <= recordsTo; i++) {
+                    $(".tab-view-content:visible").find(".rowCount-" + i).show();
+                }
+            }
+        });
+    }
+
+    $(".tab-view-buttons").on('click', '.tab-view-button', function(){
+        setTimeout(function() {
+            totalNumRecords = $(".tab-view-content:visible").find(".count").length;
+            $('.pager').jqPagination('option', 'current_page', 1)
+            pagination(recordsPerPage, totalNumRecords);
+        }, 10);
+    });
+
+    //$('.event-slides').rotator({ slides: '.event-slide', autoSlide: false, transition: 'fade' });
+   // $('.latest-tweets').rotator({ slides: '.tweet', slideDelay: 10000, transition: 'fade' });
+    $('.spot-slider-container').rotator({transition:'horizontal', bullets:true});
+    $('.twitter-slider').rotator({slideDelay: 10000, transition: 'vertical'});
+    $('#featured').rotator({ slides: '.featured-article', transition: 'fade' });
+
+    $('.toggle-navigation').on('click', function(){
+       $('.navigation').slideToggle();
+    });
+
+    $('.toggle-sidebar').on('click', function(){
+        var $sidebar = $("#sidebar");
+        if($(this).hasClass('toggled')){
+            $sidebar.removeClass('toggled');
+            $(this).removeClass('toggled');
+            setTimeout(function(){$(this).parent().removeClass('toggled');},1000);
+
+        }
+        else {
+            $sidebar.addClass('toggled');
+            $(this).addClass('toggled');
+            $(this).parent().addClass('toggled');
+
+        }
+    });
+
+	$('.add-comment').on('click', function(e){
+		e.preventDefault();
+		$(this).hide().next('.add-comment-to-qa').show();
+	});
+
+    /**
+      * Etkinlik tarihi geri sayim
+      */
+    if ($('.countdown-container').length) {
+        $('.countdown-container').countdown();
+    }
+
+    $(".unitselect").unitSelect();
+    $(".add-row").unitCloner();
+    $(".select-best, .flag").each(function(){
+        $(this).data('content', $(this).attr('title'))
+    }).tooltip();
+
+    $(".application-ct").tooltip({
+        cssClass:"application-hover",
+        placement:"right",
+        position:"start"
+    });
+
+    $(".item-ct .item").tooltip({
+        cssClass:"item-hover",
+        placement:"right",
+        position:"start"
+    });
+
+    $('.collapsible').collapsible();
+
+    // fallback helpers
+    $('.no-lastchild').find('.course:last-child, tr td:last-child, tr:first-child th:last-child, tr:last-child, .column:last-child').addClass('last');
+
+
+    if(!Modernizr.input.placeholder){
+        $('html').addClass("no-placeholder");
+
+        $("[placeholder]").each(function(){
+           var $this = $(this);
+           var ph = $this.attr('placeholder');
+           $this.val(ph);
+
+            $this.focus(function(){
+                $this.val('');
+            });
+
+            $this.blur(function(){
+               if($this.val() == ''){
+                   $this.val(ph);
+               }
+            });
+        });
+
+        $(document).on('cbox_complete', function(){
+            var $input = $("#colorbox").find("[placeholder]");
+
+            $input.each(function(){
+                var $this = $(this);
+                var ph = $this.attr('placeholder');
+                $this.before('<label>' + ph + '</label>');
+            });
+
+            $.colorbox.resize();
+        });
+    }
+
+    var $carousel = $(".jcarousel-lite");
+    if($carousel.length > 0){
+        $carousel.jCarouselLite({
+            btnNext: ".next",
+            btnPrev: ".prev",
+            auto : 3000,
+            speed : 1000,
+            visible: 4
+        });
+    }
+});

@@ -1,0 +1,53 @@
+jQuery(document).ready(function($){
+  if(typeof CKEDITOR === "object") {
+    var instanceName = Object.keys(CKEDITOR.instances)[0];
+  }
+  var oldVal = {};
+  if(typeof CKEDITOR === "object") {
+    var oldCkeditorVal = CKEDITOR.instances[instanceName].getData();
+  }
+
+  $('.form-submit').on('mousedown', function(e) {
+    var prev = $(this).prev();
+    if($(prev).attr('type') !== 'file') {
+      window.onbeforeunload = undefined;
+    }
+  });
+
+  $('form input, form textarea, form section').each(function(){
+    oldVal[$(this).attr('id')] = $(this).val();
+  });
+
+  $('form input, form textarea, form section').on('click change keypress', function(){
+    var type = $(this).attr('type');
+    if(type == 'submit') {
+      window.onbeforeunload = undefined;
+      return;
+    }
+
+    var domId = $(this).attr('id');
+    if(jQuery(this).attr('class').indexOf('ckeditor') !== -1) {
+      var val = CKEDITOR.instances[instanceName].getData();
+    }else {
+      var val = jQuery(this).val();
+    }
+
+    if(oldVal[domId] !== val) {
+      window.onbeforeunload = function() {
+        return 'Sayfadan ayrılmak istediğinize emin misiniz?';
+      };
+    }
+
+  });
+
+  if(typeof CKEDITOR === "object") {
+    CKEDITOR.instances[instanceName].on('blur', function() {
+      var val = CKEDITOR.instances[instanceName].getData();
+      if(oldCkeditorVal !== val) {
+        window.onbeforeunload = function() {
+          return 'Sayfadan ayrılmak istediğinize emin misiniz?';
+        };
+      }
+    });
+  }
+});

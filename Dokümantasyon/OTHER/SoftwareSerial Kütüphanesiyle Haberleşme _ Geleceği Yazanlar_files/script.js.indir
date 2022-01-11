@@ -1,0 +1,14 @@
+jQuery(document).ready(function($){
+
+    /**
+     * Flag
+     * @Issue #11474
+     * Confirm türündeki linkler colorbox da açılması sağlanıyor.
+     * flag linkinde tooltip açılması
+     */
+    $("a.flag-link-confirm").addClass("modal");
+    $(".flag").each(function(){
+        $(this).attr('title',$(this).text());
+    });
+
+});

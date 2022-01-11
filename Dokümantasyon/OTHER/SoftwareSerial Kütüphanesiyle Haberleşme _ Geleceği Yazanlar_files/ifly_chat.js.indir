@@ -1,0 +1,30 @@
+window.iflychatAsyncInit = function() {
+  
+  // All iFlyChat related code should be defined here
+  
+  /** iFlyChat Init function **/
+
+  iflychat.init({
+  
+    userlist : {
+      visible: true
+    }
+
+  });
+
+  /** iFlyChat ready event **/
+  iflychat.on('ready', function() {
+
+    var htmlContent = '<div style="padding:10px;">';
+    htmlContent += '<a style="border: none; color: red; text-style: underline;" href="https://gelecegiyazanlar.turkcell.com.tr/sohbet-odasi-kurallari" target="_blank">';
+    htmlContent += 'Sohbet odası kuralları';
+    htmlContent += '</a>';
+    htmlContent += '</div>';
+
+    iflychat.renderLabelInChatWindow({ 
+      id: 'c-0', 
+      position: 'above-chat-content', 
+      content: htmlContent 
+    }); 
+  }); 
+};

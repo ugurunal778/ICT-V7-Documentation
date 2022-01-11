@@ -1,0 +1,928 @@
+/**
+ * Namespace registration
+ */
+window.Namespace = {
+  Register: function (_Name) {
+    var chk = false;
+    var cob = '';
+    var spc = _Name.split('.');
+    for (var i = 0; i < spc.length; i++) {
+      if (cob !== '') {
+        cob += '.';
+      }
+      cob += spc[i];
+      chk = this.Exists(cob);
+      if (!chk) {
+        this.Create(cob);
+      }
+    }
+    if (chk) {
+      throw 'Namespace: ' + _Name + ' is already defined.';
+    }
+  },
+  Create: function (_Src) {
+    eval('window.' + _Src + ' = new Object();');
+  },
+  Exists: function (_Src) {
+    eval('var NE = false; try{if(' + _Src + '){NE = true;}else{NE = false;}}catch(err){NE=false;}');
+    return NE;
+  }
+};
+
+/**
+ * {@link http://james.padolsey.com/javascript/special-scroll-events-for-jquery/ Special scroll events for jQuery}
+ * Updated for jQuery 1.9
+ */
+;(function (window, document, $, undefined){
+    
+    var W = $(window),
+        special = $.event.special,
+        uid1 = 'D' + (+new Date()),
+        uid2 = 'D' + (+new Date() + 1);
+        
+    special.scrollstart = {
+        setup: function() {
+            
+            var timer,
+                handler = function(evt) {
+                    
+                    var _args = arguments;
+                    
+                    if (timer) {
+                        clearTimeout(timer);
+                    } else {
+                        evt.type = 'scrollstart';
+                        $(this).trigger(evt.type, _args);
+                    }
+                    
+                    timer = setTimeout( function(){
+                        timer = null;
+                    }, special.scrollstop.latency);
+                    
+                };
+            
+            W.on('scroll', handler).data(uid1, handler);
+            
+        },
+        teardown: function(){
+            W.off('scroll', $(this).data(uid1));
+        }
+    };
+    
+    special.scrollstop = {
+        latency: 300,
+        setup: function() {
+            
+            var timer,
+                handler = function(evt) {
+                
+                    var _args = arguments;
+                    
+                    if (timer) {
+                        clearTimeout(timer);
+                    }
+                    
+                    timer = setTimeout( function(){
+                        
+                        timer = null;
+                        evt.type = 'scrollstop';
+                        $(this).trigger(evt.type, _args);
+                        
+                    }, special.scrollstop.latency);
+                    
+                };
+            
+            W.on('scroll', handler).data(uid2, handler);
+            
+        },
+        teardown: function() {
+            W.off('scroll', $(this).data(uid2) );
+        }
+    };
+    
+})(window, document, jQuery);
+
+/*! Copyright (c) 2013 Brandon Aaron (http://brandonaaron.net)
+ * Licensed under the MIT License (LICENSE.txt).
+ *
+ * Thanks to: http://adomas.org/javascript-mouse-wheel/ for some pointers.
+ * Thanks to: Mathias Bank(http://www.mathias-bank.de) for a scope bug fix.
+ * Thanks to: Seamus Leahy for adding deltaX and deltaY
+ *
+ * Version: 3.1.3
+ *
+ * Requires: 1.2.2+
+ */
+(function(a){if(typeof define==="function"&&define.amd){define(["jquery"],a)}else{if(typeof exports==="object"){module.exports=a}else{a(jQuery)}}}(function(e){var d=["wheel","mousewheel","DOMMouseScroll","MozMousePixelScroll"];var g="onwheel" in document||document.documentMode>=9?["wheel"]:["mousewheel","DomMouseScroll","MozMousePixelScroll"];var f,a;if(e.event.fixHooks){for(var b=d.length;b;){e.event.fixHooks[d[--b]]=e.event.mouseHooks}}e.event.special.mousewheel={setup:function(){if(this.addEventListener){for(var h=g.length;h;){this.addEventListener(g[--h],c,false)}}else{this.onmousewheel=c}},teardown:function(){if(this.removeEventListener){for(var h=g.length;h;){this.removeEventListener(g[--h],c,false)}}else{this.onmousewheel=null}}};e.fn.extend({mousewheel:function(h){return h?this.bind("mousewheel",h):this.trigger("mousewheel")},unmousewheel:function(h){return this.unbind("mousewheel",h)}});function c(h){var i=h||window.event,n=[].slice.call(arguments,1),p=0,k=0,j=0,m=0,l=0,o;h=e.event.fix(i);h.type="mousewheel";if(i.wheelDelta){p=i.wheelDelta}if(i.detail){p=i.detail*-1}if(i.deltaY){j=i.deltaY*-1;p=j}if(i.deltaX){k=i.deltaX;p=k*-1}if(i.wheelDeltaY!==undefined){j=i.wheelDeltaY}if(i.wheelDeltaX!==undefined){k=i.wheelDeltaX*-1}m=Math.abs(p);if(!f||m<f){f=m}l=Math.max(Math.abs(j),Math.abs(k));if(!a||l<a){a=l}o=p>0?"floor":"ceil";p=Math[o](p/f);k=Math[o](k/a);j=Math[o](j/a);n.unshift(h,p,k,j);return(e.event.dispatch||e.event.handle).apply(this,n)}}));
+
+/*
+Copyright 2012 Igor Vaynberg
+ 
+Version: 3.2 Timestamp: Mon Sep 10 10:38:04 PDT 2012
+
+Licensed under the Apache License, Version 2.0 (the "License"); you may not use this work except in
+compliance with the License. You may obtain a copy of the License in the LICENSE file, or at:
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software distributed under the License is
+distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and limitations under the License.
+*/
+(function(e){"undefined"==typeof e.fn.each2&&e.fn.extend({each2:function(g){for(var i=e([0]),m=-1,s=this.length;++m<s&&(i.context=i[0]=this[m])&&!1!==g.call(i[0],m,i););return this}})})(jQuery);
+(function(e,g){function i(a,b){var c=0,d=b.length,j;if("undefined"===typeof a)return-1;if(a.constructor===String)for(;c<d;c+=1){if(0===a.localeCompare(b[c]))return c}else for(;c<d;c+=1)if(j=b[c],j.constructor===String){if(0===j.localeCompare(a))return c}else if(j===a)return c;return-1}function m(a,b){return a===b?!0:a===g||b===g||null===a||null===b?!1:a.constructor===String?0===a.localeCompare(b):b.constructor===String?0===b.localeCompare(a):!1}function s(a,b){var c,d,j;if(null===a||1>a.length)return[];
+c=a.split(b);d=0;for(j=c.length;d<j;d+=1)c[d]=e.trim(c[d]);return c}function A(a,b,c){var c=c||g,d;return function(){var j=arguments;window.clearTimeout(d);d=window.setTimeout(function(){b.apply(c,j)},a)}}function l(a){a.preventDefault();a.stopPropagation()}function B(a,b,c){var d=a.toUpperCase().indexOf(b.toUpperCase()),b=b.length;0>d?c.push(a):(c.push(a.substring(0,d)),c.push("<span class='select2-match'>"),c.push(a.substring(d,d+b)),c.push("</span>"),c.push(a.substring(d+b,a.length)))}function C(a){var b,
+c=0,d=null,j=a.quietMillis||100;return function(h){window.clearTimeout(b);b=window.setTimeout(function(){var b=c+=1,j=a.data,n=a.transport||e.ajax,f=a.traditional||!1,g=a.type||"GET",j=j.call(this,h.term,h.page,h.context);null!==d&&d.abort();d=n.call(null,{url:a.url,dataType:a.dataType,data:j,type:g,traditional:f,success:function(d){b<c||(d=a.results(d,h.page),h.callback(d))}})},j)}}function D(a){var b=a,c,d=function(a){return""+a.text};e.isArray(b)||(d=b.text,e.isFunction(d)||(c=b.text,d=function(a){return a[c]}),
+b=b.results);return function(a){var c=a.term,f={results:[]},k;if(c==="")a.callback({results:b});else{k=function(b,f){var g,t,b=b[0];if(b.children){g={};for(t in b)b.hasOwnProperty(t)&&(g[t]=b[t]);g.children=[];e(b.children).each2(function(a,b){k(b,g.children)});g.children.length&&f.push(g)}else a.matcher(c,d(b))&&f.push(b)};e(b).each2(function(a,b){k(b,f.results)});a.callback(f)}}}function E(a){return e.isFunction(a)?a:function(b){var c=b.term,d={results:[]};e(a).each(function(){var a=this.text!==
+g,e=a?this.text:this;if(""===c||b.matcher(c,e))d.results.push(a?this:{id:this,text:this})});b.callback(d)}}function u(a){if(e.isFunction(a))return!0;if(!a)return!1;throw Error("formatterName must be a function or a falsy value");}function v(a){return e.isFunction(a)?a():a}function F(a){var b=0;e.each(a,function(a,d){d.children?b+=F(d.children):b++});return b}function H(a,b,c,d){var e=a,h=!1,f,k,n,o;if(!d.createSearchChoice||!d.tokenSeparators||1>d.tokenSeparators.length)return g;for(;;){h=-1;k=0;
+for(n=d.tokenSeparators.length;k<n&&!(o=d.tokenSeparators[k],h=a.indexOf(o),0<=h);k++);if(0>h)break;f=a.substring(0,h);a=a.substring(h+o.length);if(0<f.length&&(f=d.createSearchChoice(f,b),f!==g&&null!==f&&d.id(f)!==g&&null!==d.id(f))){h=!1;k=0;for(n=b.length;k<n;k++)if(m(d.id(f),d.id(b[k]))){h=!0;break}h||c(f)}}if(0!=e.localeCompare(a))return a}function x(a,b){var c=function(){};c.prototype=new a;c.prototype.constructor=c;c.prototype.parent=a.prototype;c.prototype=e.extend(c.prototype,b);return c}
+if(window.Select2===g){var f,w,y,z,G,q;f={TAB:9,ENTER:13,ESC:27,SPACE:32,LEFT:37,UP:38,RIGHT:39,DOWN:40,SHIFT:16,CTRL:17,ALT:18,PAGE_UP:33,PAGE_DOWN:34,HOME:36,END:35,BACKSPACE:8,DELETE:46,isArrow:function(a){a=a.which?a.which:a;switch(a){case f.LEFT:case f.RIGHT:case f.UP:case f.DOWN:return!0}return!1},isControl:function(a){switch(a.which){case f.SHIFT:case f.CTRL:case f.ALT:return!0}return a.metaKey?!0:!1},isFunctionKey:function(a){a=a.which?a.which:a;return 112<=a&&123>=a}};var I=1;G=function(){return I++};
+e(document).delegate("body","mousemove",function(a){e.data(document,"select2-lastpos",{x:a.pageX,y:a.pageY})});e(document).ready(function(){e(document).delegate("body","mousedown touchend",function(a){var b=e(a.target).closest("div.select2-container").get(0),c;b?e(document).find("div.select2-container-active").each(function(){this!==b&&e(this).data("select2").blur()}):(b=e(a.target).closest("div.select2-drop").get(0),e(document).find("div.select2-drop-active").each(function(){this!==b&&e(this).data("select2").blur()}));
+b=e(a.target);c=b.attr("for");"LABEL"===a.target.tagName&&(c&&0<c.length)&&(b=e("#"+c),b=b.data("select2"),b!==g&&(b.focus(),a.preventDefault()))})});w=x(Object,{bind:function(a){var b=this;return function(){a.apply(b,arguments)}},init:function(a){var b,c;this.opts=a=this.prepareOpts(a);this.id=a.id;a.element.data("select2")!==g&&null!==a.element.data("select2")&&this.destroy();this.enabled=!0;this.container=this.createContainer();this.containerId="s2id_"+(a.element.attr("id")||"autogen"+G());this.containerSelector=
+"#"+this.containerId.replace(/([;&,\.\+\*\~':"\!\^#$%@\[\]\(\)=>\|])/g,"\\$1");this.container.attr("id",this.containerId);var d=!1,j;this.body=function(){!1===d&&(j=a.element.closest("body"),d=!0);return j};a.element.attr("class")!==g&&this.container.addClass(a.element.attr("class").replace(/validate\[[\S ]+] ?/,""));this.container.css(v(a.containerCss));this.container.addClass(v(a.containerCssClass));this.opts.element.data("select2",this).hide().before(this.container);this.container.data("select2",
+this);this.dropdown=this.container.find(".select2-drop");this.dropdown.addClass(v(a.dropdownCssClass));this.dropdown.data("select2",this);this.results=b=this.container.find(".select2-results");this.search=c=this.container.find("input.select2-input");c.attr("tabIndex",this.opts.element.attr("tabIndex"));this.resultsPage=0;this.context=null;this.initContainer();this.initContainerWidth();this.results.bind("mousemove",function(a){var b=e.data(document,"select2-lastpos");(b===g||b.x!==a.pageX||b.y!==a.pageY)&&
+e(a.target).trigger("mousemove-filtered",a)});this.dropdown.delegate(".select2-results","mousemove-filtered",this.bind(this.highlightUnderEvent));var h=this.results,f=A(80,function(a){h.trigger("scroll-debounced",a)});h.bind("scroll",function(a){0<=i(a.target,h.get())&&f(a)});this.dropdown.delegate(".select2-results","scroll-debounced",this.bind(this.loadMoreIfNeeded));e.fn.mousewheel&&b.mousewheel(function(a,c,d,e){c=b.scrollTop();0<e&&0>=c-e?(b.scrollTop(0),l(a)):0>e&&b.get(0).scrollHeight-b.scrollTop()+
+e<=b.height()&&(b.scrollTop(b.get(0).scrollHeight-b.height()),l(a))});c.bind("keydown",function(){e.data(c,"keyup-change-value")===g&&e.data(c,"keyup-change-value",c.val())});c.bind("keyup",function(){var a=e.data(c,"keyup-change-value");a!==g&&c.val()!==a&&(e.removeData(c,"keyup-change-value"),c.trigger("keyup-change"))});c.bind("keyup-change",this.bind(this.updateResults));c.bind("focus",function(){c.addClass("select2-focused");" "===c.val()&&c.val("")});c.bind("blur",function(){c.removeClass("select2-focused")});
+this.dropdown.delegate(".select2-results","mouseup",this.bind(function(a){0<e(a.target).closest(".select2-result-selectable:not(.select2-disabled)").length?(this.highlightUnderEvent(a),this.selectHighlighted(a)):this.focusSearch();l(a)}));this.dropdown.bind("click mouseup mousedown",function(a){a.stopPropagation()});e.isFunction(this.opts.initSelection)&&(this.initSelection(),this.monitorSource());(a.element.is(":disabled")||a.element.is("[readonly='readonly']"))&&this.disable()},destroy:function(){var a=
+this.opts.element.data("select2");a!==g&&(a.container.remove(),a.dropdown.remove(),a.opts.element.removeData("select2").unbind(".select2").show())},prepareOpts:function(a){var b,c,d;b=a.element;"select"===b.get(0).tagName.toLowerCase()&&(this.select=c=a.element);c&&e.each("id multiple ajax query createSearchChoice initSelection data tags".split(" "),function(){if(this in a)throw Error("Option '"+this+"' is not allowed for Select2 when attached to a <select> element.");});a=e.extend({},{populateResults:function(b,
+c,d){var f,n=this.opts.id,o=this;f=function(b,c,j){var h,l,i,m,r,p,q;h=0;for(l=b.length;h<l;h=h+1){i=b[h];m=n(i)!==g;r=i.children&&i.children.length>0;p=e("<li></li>");p.addClass("select2-results-dept-"+j);p.addClass("select2-result");p.addClass(m?"select2-result-selectable":"select2-result-unselectable");r&&p.addClass("select2-result-with-children");p.addClass(o.opts.formatResultCssClass(i));m=e("<div></div>");m.addClass("select2-result-label");q=a.formatResult(i,m,d);q!==g&&m.html(o.opts.escapeMarkup(q));
+p.append(m);if(r){r=e("<ul></ul>");r.addClass("select2-result-sub");f(i.children,r,j+1);p.append(r)}p.data("select2-data",i);c.append(p)}};f(c,b,0)}},e.fn.select2.defaults,a);"function"!==typeof a.id&&(d=a.id,a.id=function(a){return a[d]});if(c)a.query=this.bind(function(a){var c={results:[],more:false},d=a.term,f,n,o;o=function(b,c){var e;if(b.is("option"))a.matcher(d,b.text(),b)&&c.push({id:b.attr("value"),text:b.text(),element:b.get(),css:b.attr("class")});else if(b.is("optgroup")){e={text:b.attr("label"),
+children:[],element:b.get(),css:b.attr("class")};b.children().each2(function(a,b){o(b,e.children)});e.children.length>0&&c.push(e)}};f=b.children();if(this.getPlaceholder()!==g&&f.length>0){n=f[0];e(n).text()===""&&(f=f.not(n))}f.each2(function(a,b){o(b,c.results)});a.callback(c)}),a.id=function(a){return a.id},a.formatResultCssClass=function(a){return a.css};else if(!("query"in a))if("ajax"in a){if((c=a.element.data("ajax-url"))&&0<c.length)a.ajax.url=c;a.query=C(a.ajax)}else"data"in a?a.query=D(a.data):
+"tags"in a&&(a.query=E(a.tags),a.createSearchChoice=function(a){return{id:a,text:a}},a.initSelection=function(b,c){var d=[];e(s(b.val(),a.separator)).each(function(){var b=this,c=this,j=a.tags;e.isFunction(j)&&(j=j());e(j).each(function(){if(m(this.id,b)){c=this.text;return false}});d.push({id:b,text:c})});c(d)});if("function"!==typeof a.query)throw"query function not defined for Select2 "+a.element.attr("id");return a},monitorSource:function(){this.opts.element.bind("change.select2",this.bind(function(){!0!==
+this.opts.element.data("select2-change-triggered")&&this.initSelection()}))},triggerChange:function(a){a=a||{};a=e.extend({},a,{type:"change",val:this.val()});this.opts.element.data("select2-change-triggered",!0);this.opts.element.trigger(a);this.opts.element.data("select2-change-triggered",!1);this.opts.element.click();this.opts.blurOnChange&&this.opts.element.blur()},enable:function(){this.enabled||(this.enabled=!0,this.container.removeClass("select2-container-disabled"))},disable:function(){this.enabled&&
+(this.close(),this.enabled=!1,this.container.addClass("select2-container-disabled"))},opened:function(){return this.container.hasClass("select2-dropdown-open")},positionDropdown:function(){var a=this.container.offset(),b=this.container.outerHeight(),c=this.container.outerWidth(),d=this.dropdown.outerHeight(),j=e(window).scrollTop()+document.documentElement.clientHeight,b=a.top+b,f=a.left,j=b+d<=j,g=a.top-d>=this.body().scrollTop(),k=this.dropdown.hasClass("select2-drop-above"),n;"static"!==this.body().css("position")&&
+(n=this.body().offset(),b-=n.top,f-=n.left);k?(k=!0,!g&&j&&(k=!1)):(k=!1,!j&&g&&(k=!0));k?(b=a.top-d,this.container.addClass("select2-drop-above"),this.dropdown.addClass("select2-drop-above")):(this.container.removeClass("select2-drop-above"),this.dropdown.removeClass("select2-drop-above"));a=e.extend({top:b,left:f,width:c},v(this.opts.dropdownCss));this.dropdown.css(a)},shouldOpen:function(){var a;if(this.opened())return!1;a=e.Event("open");this.opts.element.trigger(a);return!a.isDefaultPrevented()},
+clearDropdownAlignmentPreference:function(){this.container.removeClass("select2-drop-above");this.dropdown.removeClass("select2-drop-above")},open:function(){if(!this.shouldOpen())return!1;window.setTimeout(this.bind(this.opening),1);return!0},opening:function(){var a=this.containerId,b=this.containerSelector,c="scroll."+a,d="resize."+a;this.container.parents().each(function(){e(this).bind(c,function(){var a=e(b);0==a.length&&e(this).unbind(c);a.select2("close")})});e(window).bind(d,function(){var a=
+e(b);0==a.length&&e(window).unbind(d);a.select2("close")});this.clearDropdownAlignmentPreference();" "===this.search.val()&&this.search.val("");this.container.addClass("select2-dropdown-open").addClass("select2-container-active");this.updateResults(!0);this.dropdown[0]!==this.body().children().last()[0]&&this.dropdown.detach().appendTo(this.body());this.dropdown.show();this.positionDropdown();this.dropdown.addClass("select2-drop-active");this.ensureHighlightVisible();this.focusSearch()},close:function(){if(this.opened()){var a=
+this;this.container.parents().each(function(){e(this).unbind("scroll."+a.containerId)});e(window).unbind("resize."+this.containerId);this.clearDropdownAlignmentPreference();this.dropdown.hide();this.container.removeClass("select2-dropdown-open").removeClass("select2-container-active");this.results.empty();this.clearSearch();this.opts.element.trigger(e.Event("close"))}},clearSearch:function(){},ensureHighlightVisible:function(){var a=this.results,b,c,d,f;c=this.highlight();0>c||(0==c?a.scrollTop(0):
+(b=a.find(".select2-result-selectable"),d=e(b[c]),f=d.offset().top+d.outerHeight(),c===b.length-1&&(b=a.find("li.select2-more-results"),0<b.length&&(f=b.offset().top+b.outerHeight())),b=a.offset().top+a.outerHeight(),f>b&&a.scrollTop(a.scrollTop()+(f-b)),d=d.offset().top-a.offset().top,0>d&&a.scrollTop(a.scrollTop()+d)))},moveHighlight:function(a){for(var b=this.results.find(".select2-result-selectable"),c=this.highlight();-1<c&&c<b.length;){var c=c+a,d=e(b[c]);if(d.hasClass("select2-result-selectable")&&
+!d.hasClass("select2-disabled")){this.highlight(c);break}}},highlight:function(a){var b=this.results.find(".select2-result-selectable").not(".select2-disabled");if(0===arguments.length)return i(b.filter(".select2-highlighted")[0],b.get());a>=b.length&&(a=b.length-1);0>a&&(a=0);b.removeClass("select2-highlighted");e(b[a]).addClass("select2-highlighted");this.ensureHighlightVisible()},countSelectableResults:function(){return this.results.find(".select2-result-selectable").not(".select2-disabled").length},
+highlightUnderEvent:function(a){a=e(a.target).closest(".select2-result-selectable");if(0<a.length&&!a.is(".select2-highlighted")){var b=this.results.find(".select2-result-selectable");this.highlight(b.index(a))}else 0==a.length&&this.results.find(".select2-highlighted").removeClass("select2-highlighted")},loadMoreIfNeeded:function(){var a=this.results,b=a.find("li.select2-more-results"),c,d=this.resultsPage+1,e=this,f=this.search.val(),g=this.context;0!==b.length&&(c=b.offset().top-a.offset().top-
+a.height(),0>=c&&(b.addClass("select2-active"),this.opts.query({term:f,page:d,context:g,matcher:this.opts.matcher,callback:this.bind(function(c){e.opened()&&(e.opts.populateResults.call(this,a,c.results,{term:f,page:d,context:g}),!0===c.more?(b.detach().appendTo(a).text(e.opts.formatLoadMore(d+1)),window.setTimeout(function(){e.loadMoreIfNeeded()},10)):b.remove(),e.positionDropdown(),e.resultsPage=d)})})))},tokenize:function(){},updateResults:function(a){function b(){f.scrollTop(0);d.removeClass("select2-active");
+k.positionDropdown()}function c(a){f.html(k.opts.escapeMarkup(a));b()}var d=this.search,f=this.results,h=this.opts,i,k=this;if(!(!0!==a&&(!1===this.showSearchInput||!this.opened()))){d.addClass("select2-active");if(1<=h.maximumSelectionSize&&(i=this.data(),e.isArray(i)&&i.length>=h.maximumSelectionSize&&u(h.formatSelectionTooBig,"formatSelectionTooBig"))){c("<li class='select2-selection-limit'>"+h.formatSelectionTooBig(h.maximumSelectionSize)+"</li>");return}d.val().length<h.minimumInputLength&&u(h.formatInputTooShort,
+"formatInputTooShort")?c("<li class='select2-no-results'>"+h.formatInputTooShort(d.val(),h.minimumInputLength)+"</li>"):(c("<li class='select2-searching'>"+h.formatSearching()+"</li>"),i=this.tokenize(),i!=g&&null!=i&&d.val(i),this.resultsPage=1,h.query({term:d.val(),page:this.resultsPage,context:null,matcher:h.matcher,callback:this.bind(function(i){var l;this.opened()&&((this.context=i.context===g?null:i.context,this.opts.createSearchChoice&&""!==d.val()&&(l=this.opts.createSearchChoice.call(null,
+d.val(),i.results),l!==g&&null!==l&&k.id(l)!==g&&null!==k.id(l)&&0===e(i.results).filter(function(){return m(k.id(this),k.id(l))}).length&&i.results.unshift(l)),0===i.results.length&&u(h.formatNoMatches,"formatNoMatches"))?c("<li class='select2-no-results'>"+h.formatNoMatches(d.val())+"</li>"):(f.empty(),k.opts.populateResults.call(this,f,i.results,{term:d.val(),page:this.resultsPage,context:null}),!0===i.more&&u(h.formatLoadMore,"formatLoadMore")&&(f.append("<li class='select2-more-results'>"+k.opts.escapeMarkup(h.formatLoadMore(this.resultsPage))+
+"</li>"),window.setTimeout(function(){k.loadMoreIfNeeded()},10)),this.postprocessResults(i,a),b()))})}))}},cancel:function(){this.close()},blur:function(){this.close();this.container.removeClass("select2-container-active");this.dropdown.removeClass("select2-drop-active");this.search[0]===document.activeElement&&this.search.blur();this.clearSearch();this.selection.find(".select2-search-choice-focus").removeClass("select2-search-choice-focus")},focusSearch:function(){this.search.show();this.search.focus();
+window.setTimeout(this.bind(function(){this.search.show();this.search.focus();this.search.val(this.search.val())}),10)},selectHighlighted:function(){var a=this.highlight(),b=this.results.find(".select2-highlighted").not(".select2-disabled"),c=b.closest(".select2-result-selectable").data("select2-data");c&&(b.addClass("select2-disabled"),this.highlight(a),this.onSelect(c))},getPlaceholder:function(){return this.opts.element.attr("placeholder")||this.opts.element.attr("data-placeholder")||this.opts.element.data("placeholder")||
+this.opts.placeholder},initContainerWidth:function(){var a=function(){var a,c,d,f;if("off"===this.opts.width)return null;if("element"===this.opts.width)return 0===this.opts.element.outerWidth()?"auto":this.opts.element.outerWidth()+"px";if("copy"===this.opts.width||"resolve"===this.opts.width){a=this.opts.element.attr("style");if(a!==g){a=a.split(";");d=0;for(f=a.length;d<f;d+=1)if(c=a[d].replace(/\s/g,"").match(/width:(([-+]?([0-9]*\.)?[0-9]+)(px|em|ex|%|in|cm|mm|pt|pc))/),null!==c&&1<=c.length)return c[1]}return"resolve"===
+this.opts.width?(a=this.opts.element.css("width"),0<a.indexOf("%")?a:0===this.opts.element.outerWidth()?"auto":this.opts.element.outerWidth()+"px"):null}return e.isFunction(this.opts.width)?this.opts.width():this.opts.width}.call(this);null!==a&&this.container.attr("style","width: "+a)}});y=x(w,{createContainer:function(){return e("<div></div>",{"class":"select2-container"}).html("    <a href='#' onclick='return false;' class='select2-choice'>   <span></span><abbr class='select2-search-choice-close' style='display:none;'></abbr>   <div><b></b></div></a>    <div class='select2-drop select2-offscreen'>   <div class='select2-search'>       <input type='text' autocomplete='off' class='select2-input'/>   </div>   <ul class='select2-results'>   </ul></div>")},
+opening:function(){this.search.show();this.parent.opening.apply(this,arguments);this.dropdown.removeClass("select2-offscreen")},close:function(){this.opened()&&(this.parent.close.apply(this,arguments),this.dropdown.removeAttr("style").addClass("select2-offscreen").insertAfter(this.selection).show())},focus:function(){this.close();this.selection.focus()},isFocused:function(){return this.selection[0]===document.activeElement},cancel:function(){this.parent.cancel.apply(this,arguments);this.selection.focus()},
+initContainer:function(){var a,b=this.dropdown;this.selection=a=this.container.find(".select2-choice");this.search.bind("keydown",this.bind(function(a){if(this.enabled)if(a.which===f.PAGE_UP||a.which===f.PAGE_DOWN)l(a);else if(this.opened())switch(a.which){case f.UP:case f.DOWN:this.moveHighlight(a.which===f.UP?-1:1);l(a);break;case f.TAB:case f.ENTER:this.selectHighlighted();l(a);break;case f.ESC:this.cancel(a),l(a)}else a.which===f.TAB||f.isControl(a)||f.isFunctionKey(a)||a.which===f.ESC||!1===
+this.opts.openOnEnter&&a.which===f.ENTER||this.open()}));this.search.bind("focus",this.bind(function(){this.selection.attr("tabIndex","-1")}));this.search.bind("blur",this.bind(function(){this.opened()||this.container.removeClass("select2-container-active");window.setTimeout(this.bind(function(){this.selection.attr("tabIndex",this.opts.element.attr("tabIndex"))}),10)}));a.bind("mousedown",this.bind(function(){this.opened()?(this.close(),this.selection.focus()):this.enabled&&this.open()}));b.bind("mousedown",
+this.bind(function(){this.search.focus()}));a.bind("focus",this.bind(function(){this.container.addClass("select2-container-active");this.search.attr("tabIndex","-1")}));a.bind("blur",this.bind(function(){this.opened()||this.container.removeClass("select2-container-active");window.setTimeout(this.bind(function(){this.search.attr("tabIndex",this.opts.element.attr("tabIndex"))}),10)}));a.bind("keydown",this.bind(function(a){if(this.enabled)if(a.which===f.PAGE_UP||a.which===f.PAGE_DOWN)l(a);else if(!(a.which===
+f.TAB||f.isControl(a)||f.isFunctionKey(a)||a.which===f.ESC)&&!(!1===this.opts.openOnEnter&&a.which===f.ENTER))if(a.which==f.DELETE)this.opts.allowClear&&this.clear();else{this.open();if(a.which!==f.ENTER&&!(48>a.which)){var b=String.fromCharCode(a.which).toLowerCase();a.shiftKey&&(b=b.toUpperCase());this.search.focus();this.search.val(b)}l(a)}}));a.delegate("abbr","mousedown",this.bind(function(a){this.enabled&&(this.clear(),l(a),this.close(),this.triggerChange(),this.selection.focus())}));this.setPlaceholder();
+this.search.bind("focus",this.bind(function(){this.container.addClass("select2-container-active")}))},clear:function(){this.opts.element.val("");this.selection.find("span").empty();this.selection.removeData("select2-data");this.setPlaceholder()},initSelection:function(){if(""===this.opts.element.val())this.close(),this.setPlaceholder();else{var a=this;this.opts.initSelection.call(null,this.opts.element,function(b){b!==g&&null!==b&&(a.updateSelection(b),a.close(),a.setPlaceholder())})}},prepareOpts:function(){var a=
+this.parent.prepareOpts.apply(this,arguments);"select"===a.element.get(0).tagName.toLowerCase()&&(a.initSelection=function(a,c){var d=a.find(":selected");e.isFunction(c)&&c({id:d.attr("value"),text:d.text()})});return a},setPlaceholder:function(){var a=this.getPlaceholder();""===this.opts.element.val()&&a!==g&&!(this.select&&""!==this.select.find("option:first").text())&&(this.selection.find("span").html(this.opts.escapeMarkup(a)),this.selection.addClass("select2-default"),this.selection.find("abbr").hide())},
+postprocessResults:function(a,b){var c=0,d=this,f=!0;this.results.find(".select2-result-selectable").each2(function(a,b){if(m(d.id(b.data("select2-data")),d.opts.element.val()))return c=a,!1});this.highlight(c);!0===b&&(f=this.showSearchInput=F(a.results)>=this.opts.minimumResultsForSearch,this.dropdown.find(".select2-search")[f?"removeClass":"addClass"]("select2-search-hidden"),e(this.dropdown,this.container)[f?"addClass":"removeClass"]("select2-with-searchbox"))},onSelect:function(a){var b=this.opts.element.val();
+this.opts.element.val(this.id(a));this.updateSelection(a);this.close();this.selection.focus();m(b,this.id(a))||this.triggerChange()},updateSelection:function(a){var b=this.selection.find("span");this.selection.data("select2-data",a);b.empty();a=this.opts.formatSelection(a,b);a!==g&&b.append(this.opts.escapeMarkup(a));this.selection.removeClass("select2-default");this.opts.allowClear&&this.getPlaceholder()!==g&&this.selection.find("abbr").show()},val:function(){var a,b=null,c=this;if(0===arguments.length)return this.opts.element.val();
+a=arguments[0];if(this.select)this.select.val(a).find(":selected").each2(function(a,c){b={id:c.attr("value"),text:c.text()};return!1}),this.updateSelection(b),this.setPlaceholder();else{if(this.opts.initSelection===g)throw Error("cannot call val() if initSelection() is not defined");a?(this.opts.element.val(a),this.opts.initSelection(this.opts.element,function(a){c.opts.element.val(!a?"":c.id(a));c.updateSelection(a);c.setPlaceholder()})):this.clear()}},clearSearch:function(){this.search.val("")},
+data:function(a){var b;if(0===arguments.length)return b=this.selection.data("select2-data"),b==g&&(b=null),b;!a||""===a?this.clear():(this.opts.element.val(!a?"":this.id(a)),this.updateSelection(a))}});z=x(w,{createContainer:function(){return e("<div></div>",{"class":"select2-container select2-container-multi"}).html("    <ul class='select2-choices'>  <li class='select2-search-field'>    <input type='text' autocomplete='off' class='select2-input'>  </li></ul><div class='select2-drop select2-drop-multi' style='display:none;'>   <ul class='select2-results'>   </ul></div>")},
+prepareOpts:function(){var a=this.parent.prepareOpts.apply(this,arguments);"select"===a.element.get(0).tagName.toLowerCase()&&(a.initSelection=function(a,c){var d=[];a.find(":selected").each2(function(a,b){d.push({id:b.attr("value"),text:b.text()})});e.isFunction(c)&&c(d)});return a},initContainer:function(){var a;this.searchContainer=this.container.find(".select2-search-field");this.selection=a=this.container.find(".select2-choices");this.search.bind("keydown",this.bind(function(b){if(this.enabled){if(b.which===
+f.BACKSPACE&&""===this.search.val()){this.close();var c;c=a.find(".select2-search-choice-focus");if(0<c.length){this.unselect(c.first());this.search.width(10);l(b);return}c=a.find(".select2-search-choice");0<c.length&&c.last().addClass("select2-search-choice-focus")}else a.find(".select2-search-choice-focus").removeClass("select2-search-choice-focus");if(this.opened())switch(b.which){case f.UP:case f.DOWN:this.moveHighlight(b.which===f.UP?-1:1);l(b);return;case f.ENTER:case f.TAB:this.selectHighlighted();
+l(b);return;case f.ESC:this.cancel(b);l(b);return}if(!(b.which===f.TAB||f.isControl(b)||f.isFunctionKey(b)||b.which===f.BACKSPACE||b.which===f.ESC)&&!(!1===this.opts.openOnEnter&&b.which===f.ENTER))this.open(),(b.which===f.PAGE_UP||b.which===f.PAGE_DOWN)&&l(b)}}));this.search.bind("keyup",this.bind(this.resizeSearch));this.search.bind("blur",this.bind(function(a){this.container.removeClass("select2-container-active");this.search.removeClass("select2-focused");this.clearSearch();a.stopImmediatePropagation()}));
+this.container.delegate(".select2-choices","mousedown",this.bind(function(a){this.enabled&&!(0<e(a.target).closest(".select2-search-choice").length)&&(this.clearPlaceholder(),this.open(),this.focusSearch(),a.preventDefault())}));this.container.delegate(".select2-choices","focus",this.bind(function(){this.enabled&&(this.container.addClass("select2-container-active"),this.dropdown.addClass("select2-drop-active"),this.clearPlaceholder())}));this.clearSearch()},enable:function(){this.enabled||(this.parent.enable.apply(this,
+arguments),this.search.removeAttr("disabled"))},disable:function(){this.enabled&&(this.parent.disable.apply(this,arguments),this.search.attr("disabled",!0))},initSelection:function(){""===this.opts.element.val()&&(this.updateSelection([]),this.close(),this.clearSearch());if(this.select||""!==this.opts.element.val()){var a=this;this.opts.initSelection.call(null,this.opts.element,function(b){if(b!==g&&b!==null){a.updateSelection(b);a.close();a.clearSearch()}})}},clearSearch:function(){var a=this.getPlaceholder();
+a!==g&&0===this.getVal().length&&!1===this.search.hasClass("select2-focused")?(this.search.val(a).addClass("select2-default"),this.resizeSearch()):this.search.val(" ").width(10)},clearPlaceholder:function(){this.search.hasClass("select2-default")?this.search.val("").removeClass("select2-default"):" "===this.search.val()&&this.search.val("")},opening:function(){this.parent.opening.apply(this,arguments);this.clearPlaceholder();this.resizeSearch();this.focusSearch()},close:function(){this.opened()&&
+this.parent.close.apply(this,arguments)},focus:function(){this.close();this.search.focus()},isFocused:function(){return this.search.hasClass("select2-focused")},updateSelection:function(a){var b=[],c=[],d=this;e(a).each(function(){0>i(d.id(this),b)&&(b.push(d.id(this)),c.push(this))});a=c;this.selection.find(".select2-search-choice").remove();e(a).each(function(){d.addSelectedChoice(this)});d.postprocessResults()},tokenize:function(){var a=this.search.val(),a=this.opts.tokenizer(a,this.data(),this.bind(this.onSelect),
+this.opts);null!=a&&a!=g&&(this.search.val(a),0<a.length&&this.open())},onSelect:function(a){this.addSelectedChoice(a);this.select&&this.postprocessResults();this.opts.closeOnSelect?(this.close(),this.search.width(10)):0<this.countSelectableResults()?(this.search.width(10),this.resizeSearch(),this.positionDropdown()):this.close();this.triggerChange({added:a});this.focusSearch()},cancel:function(){this.close();this.focusSearch()},addSelectedChoice:function(a){var b=e("<li class='select2-search-choice'>    <div></div>    <a href='#' onclick='return false;' class='select2-search-choice-close' tabindex='-1'></a></li>"),
+c=this.id(a),d=this.getVal(),f;f=this.opts.formatSelection(a,b);b.find("div").replaceWith("<div>"+this.opts.escapeMarkup(f)+"</div>");b.find(".select2-search-choice-close").bind("mousedown",l).bind("click dblclick",this.bind(function(a){this.enabled&&(e(a.target).closest(".select2-search-choice").fadeOut("fast",this.bind(function(){this.unselect(e(a.target));this.selection.find(".select2-search-choice-focus").removeClass("select2-search-choice-focus");this.close();this.focusSearch()})).dequeue(),
+l(a))})).bind("focus",this.bind(function(){this.enabled&&(this.container.addClass("select2-container-active"),this.dropdown.addClass("select2-drop-active"))}));b.data("select2-data",a);b.insertBefore(this.searchContainer);d.push(c);this.setVal(d)},unselect:function(a){var b=this.getVal(),c,d,a=a.closest(".select2-search-choice");if(0===a.length)throw"Invalid argument: "+a+". Must be .select2-search-choice";c=a.data("select2-data");d=i(this.id(c),b);0<=d&&(b.splice(d,1),this.setVal(b),this.select&&
+this.postprocessResults());a.remove();this.triggerChange({removed:c})},postprocessResults:function(){var a=this.getVal(),b=this.results.find(".select2-result-selectable"),c=this.results.find(".select2-result-with-children"),d=this;b.each2(function(b,c){var e=d.id(c.data("select2-data"));0<=i(e,a)?c.addClass("select2-disabled").removeClass("select2-result-selectable"):c.removeClass("select2-disabled").addClass("select2-result-selectable")});c.each2(function(a,b){0==b.find(".select2-result-selectable").length?
+b.addClass("select2-disabled"):b.removeClass("select2-disabled")});b.each2(function(a,b){if(!b.hasClass("select2-disabled")&&b.hasClass("select2-result-selectable"))return d.highlight(0),!1})},resizeSearch:function(){var a,b,c,d,f=this.search.outerWidth()-this.search.width();a=this.search;q||(c=a[0].currentStyle||window.getComputedStyle(a[0],null),q=e("<div></div>").css({position:"absolute",left:"-10000px",top:"-10000px",display:"none",fontSize:c.fontSize,fontFamily:c.fontFamily,fontStyle:c.fontStyle,
+fontWeight:c.fontWeight,letterSpacing:c.letterSpacing,textTransform:c.textTransform,whiteSpace:"nowrap"}),e("body").append(q));q.text(a.val());a=q.width()+10;b=this.search.offset().left;c=this.selection.width();d=this.selection.offset().left;b=c-(b-d)-f;b<a&&(b=c-f);40>b&&(b=c-f);this.search.width(b)},getVal:function(){var a;if(this.select)return a=this.select.val(),null===a?[]:a;a=this.opts.element.val();return s(a,this.opts.separator)},setVal:function(a){var b;this.select?this.select.val(a):(b=
+[],e(a).each(function(){0>i(this,b)&&b.push(this)}),this.opts.element.val(0===b.length?"":b.join(this.opts.separator)))},val:function(){var a,b=[],c=this;if(0===arguments.length)return this.getVal();if(a=arguments[0])if(this.setVal(a),this.select)this.select.find(":selected").each(function(){b.push({id:e(this).attr("value"),text:e(this).text()})}),this.updateSelection(b);else{if(this.opts.initSelection===g)throw Error("val() cannot be called if initSelection() is not defined");this.opts.initSelection(this.opts.element,
+function(a){var b=e(a).map(c.id);c.setVal(b);c.updateSelection(a);c.clearSearch()})}else this.opts.element.val(""),this.updateSelection([]);this.clearSearch()},onSortStart:function(){if(this.select)throw Error("Sorting of elements is not supported when attached to <select>. Attach to <input type='hidden'/> instead.");this.search.width(0);this.searchContainer.hide()},onSortEnd:function(){var a=[],b=this;this.searchContainer.show();this.searchContainer.appendTo(this.searchContainer.parent());this.resizeSearch();
+this.selection.find(".select2-search-choice").each(function(){a.push(b.opts.id(e(this).data("select2-data")))});this.setVal(a);this.triggerChange()},data:function(a){var b=this,c;if(0===arguments.length)return this.selection.find(".select2-search-choice").map(function(){return e(this).data("select2-data")}).get();a||(a=[]);c=e.map(a,function(a){return b.opts.id(a)});this.setVal(c);this.updateSelection(a);this.clearSearch()}});e.fn.select2=function(){var a=Array.prototype.slice.call(arguments,0),b,
+c,d,f,h="val destroy opened open close focus isFocused container onSortStart onSortEnd enable disable positionDropdown data".split(" ");this.each(function(){if(0===a.length||"object"===typeof a[0])b=0===a.length?{}:e.extend({},a[0]),b.element=e(this),"select"===b.element.get(0).tagName.toLowerCase()?f=b.element.attr("multiple"):(f=b.multiple||!1,"tags"in b&&(b.multiple=f=!0)),c=f?new z:new y,c.init(b);else if("string"===typeof a[0]){if(0>i(a[0],h))throw"Unknown method: "+a[0];d=g;c=e(this).data("select2");
+if(c!==g&&(d="container"===a[0]?c.container:c[a[0]].apply(c,a.slice(1)),d!==g))return!1}else throw"Invalid arguments to select2 plugin: "+a;});return d===g?this:d};e.fn.select2.defaults={width:"copy",closeOnSelect:!0,openOnEnter:!0,containerCss:{},dropdownCss:{},containerCssClass:"",dropdownCssClass:"",formatResult:function(a,b,c){b=[];B(a.text,c.term,b);return b.join("")},formatSelection:function(a){return a?a.text:g},formatResultCssClass:function(){return g},formatNoMatches:function(){return"No matches found"},
+formatInputTooShort:function(a,b){return"Please enter "+(b-a.length)+" more characters"},formatSelectionTooBig:function(a){return"You can only select "+a+" item"+(1==a?"":"s")},formatLoadMore:function(){return"Loading more results..."},formatSearching:function(){return"Searching..."},minimumResultsForSearch:0,minimumInputLength:0,maximumSelectionSize:0,id:function(a){return a.id},matcher:function(a,b){return 0<=b.toUpperCase().indexOf(a.toUpperCase())},separator:",",tokenSeparators:[],tokenizer:H,
+escapeMarkup:function(a){return a&&"string"===typeof a?a.replace(/&/g,"&amp;"):a},blurOnChange:!1};window.Select2={query:{ajax:C,local:D,tags:E},util:{debounce:A,markMatch:B},"class":{"abstract":w,single:y,multi:z}}}})(jQuery);
+
+/*
+ * jScrollPane - v2.0.0beta12 - 2012-09-27
+ * http://jscrollpane.kelvinluck.com/
+ *
+ * Copyright (c) 2010 Kelvin Luck
+ * Dual licensed under the MIT or GPL licenses.
+ */
+(function(b,a,c){b.fn.jScrollPane=function(e){function d(D,O){var ay,Q=this,Y,aj,v,al,T,Z,y,q,az,aE,au,i,I,h,j,aa,U,ap,X,t,A,aq,af,am,G,l,at,ax,x,av,aH,f,L,ai=true,P=true,aG=false,k=false,ao=D.clone(false,false).empty(),ac=b.fn.mwheelIntent?"mwheelIntent.jsp":"mousewheel.jsp";aH=D.css("paddingTop")+" "+D.css("paddingRight")+" "+D.css("paddingBottom")+" "+D.css("paddingLeft");f=(parseInt(D.css("paddingLeft"),10)||0)+(parseInt(D.css("paddingRight"),10)||0);function ar(aQ){var aL,aN,aM,aJ,aI,aP,aO=false,aK=false;ay=aQ;if(Y===c){aI=D.scrollTop();aP=D.scrollLeft();D.css({overflow:"hidden",padding:0});aj=D.innerWidth()+f;v=D.innerHeight();D.width(aj);Y=b('<div class="jspPane" />').css("padding",aH).append(D.children());al=b('<div class="jspContainer" />').css({width:aj+"px",height:v+"px"}).append(Y).appendTo(D)}else{D.css("width","");aO=ay.stickToBottom&&K();aK=ay.stickToRight&&B();aJ=D.innerWidth()+f!=aj||D.outerHeight()!=v;if(aJ){aj=D.innerWidth()+f;v=D.innerHeight();al.css({width:aj+"px",height:v+"px"})}if(!aJ&&L==T&&Y.outerHeight()==Z){D.width(aj);return}L=T;Y.css("width","");D.width(aj);al.find(">.jspVerticalBar,>.jspHorizontalBar").remove().end()}Y.css("overflow","auto");if(aQ.contentWidth){T=aQ.contentWidth}else{T=Y[0].scrollWidth}Z=Y[0].scrollHeight;Y.css("overflow","");y=T/aj;q=Z/v;az=q>1;aE=y>1;if(!(aE||az)){D.removeClass("jspScrollable");Y.css({top:0,width:al.width()-f});n();E();R();w()}else{D.addClass("jspScrollable");aL=ay.maintainPosition&&(I||aa);if(aL){aN=aC();aM=aA()}aF();z();F();if(aL){N(aK?(T-aj):aN,false);M(aO?(Z-v):aM,false)}J();ag();an();if(ay.enableKeyboardNavigation){S()}if(ay.clickOnTrack){p()}C();if(ay.hijackInternalLinks){m()}}if(ay.autoReinitialise&&!av){av=setInterval(function(){ar(ay)},ay.autoReinitialiseDelay)}else{if(!ay.autoReinitialise&&av){clearInterval(av)}}aI&&D.scrollTop(0)&&M(aI,false);aP&&D.scrollLeft(0)&&N(aP,false);D.trigger("jsp-initialised",[aE||az])}function aF(){if(az){al.append(b('<div class="jspVerticalBar" />').append(b('<div class="jspCap jspCapTop" />'),b('<div class="jspTrack" />').append(b('<div class="jspDrag" />').append(b('<div class="jspDragTop" />'),b('<div class="jspDragBottom" />'))),b('<div class="jspCap jspCapBottom" />')));U=al.find(">.jspVerticalBar");ap=U.find(">.jspTrack");au=ap.find(">.jspDrag");if(ay.showArrows){aq=b('<a class="jspArrow jspArrowUp" />').bind("mousedown.jsp",aD(0,-1)).bind("click.jsp",aB);af=b('<a class="jspArrow jspArrowDown" />').bind("mousedown.jsp",aD(0,1)).bind("click.jsp",aB);if(ay.arrowScrollOnHover){aq.bind("mouseover.jsp",aD(0,-1,aq));af.bind("mouseover.jsp",aD(0,1,af))}ak(ap,ay.verticalArrowPositions,aq,af)}t=v;al.find(">.jspVerticalBar>.jspCap:visible,>.jspVerticalBar>.jspArrow").each(function(){t-=b(this).outerHeight()});au.hover(function(){au.addClass("jspHover")},function(){au.removeClass("jspHover")}).bind("mousedown.jsp",function(aI){b("html").bind("dragstart.jsp selectstart.jsp",aB);au.addClass("jspActive");var s=aI.pageY-au.position().top;b("html").bind("mousemove.jsp",function(aJ){V(aJ.pageY-s,false)}).bind("mouseup.jsp mouseleave.jsp",aw);return false});o()}}function o(){ap.height(t+"px");I=0;X=ay.verticalGutter+ap.outerWidth();Y.width(aj-X-f);try{if(U.position().left===0){Y.css("margin-left",X+"px")}}catch(s){}}function z(){if(aE){al.append(b('<div class="jspHorizontalBar" />').append(b('<div class="jspCap jspCapLeft" />'),b('<div class="jspTrack" />').append(b('<div class="jspDrag" />').append(b('<div class="jspDragLeft" />'),b('<div class="jspDragRight" />'))),b('<div class="jspCap jspCapRight" />')));am=al.find(">.jspHorizontalBar");G=am.find(">.jspTrack");h=G.find(">.jspDrag");if(ay.showArrows){ax=b('<a class="jspArrow jspArrowLeft" />').bind("mousedown.jsp",aD(-1,0)).bind("click.jsp",aB);x=b('<a class="jspArrow jspArrowRight" />').bind("mousedown.jsp",aD(1,0)).bind("click.jsp",aB);
+if(ay.arrowScrollOnHover){ax.bind("mouseover.jsp",aD(-1,0,ax));x.bind("mouseover.jsp",aD(1,0,x))}ak(G,ay.horizontalArrowPositions,ax,x)}h.hover(function(){h.addClass("jspHover")},function(){h.removeClass("jspHover")}).bind("mousedown.jsp",function(aI){b("html").bind("dragstart.jsp selectstart.jsp",aB);h.addClass("jspActive");var s=aI.pageX-h.position().left;b("html").bind("mousemove.jsp",function(aJ){W(aJ.pageX-s,false)}).bind("mouseup.jsp mouseleave.jsp",aw);return false});l=al.innerWidth();ah()}}function ah(){al.find(">.jspHorizontalBar>.jspCap:visible,>.jspHorizontalBar>.jspArrow").each(function(){l-=b(this).outerWidth()});G.width(l+"px");aa=0}function F(){if(aE&&az){var aI=G.outerHeight(),s=ap.outerWidth();t-=aI;b(am).find(">.jspCap:visible,>.jspArrow").each(function(){l+=b(this).outerWidth()});l-=s;v-=s;aj-=aI;G.parent().append(b('<div class="jspCorner" />').css("width",aI+"px"));o();ah()}if(aE){Y.width((al.outerWidth()-f)+"px")}Z=Y.outerHeight();q=Z/v;if(aE){at=Math.ceil(1/y*l);if(at>ay.horizontalDragMaxWidth){at=ay.horizontalDragMaxWidth}else{if(at<ay.horizontalDragMinWidth){at=ay.horizontalDragMinWidth}}h.width(at+"px");j=l-at;ae(aa)}if(az){A=Math.ceil(1/q*t);if(A>ay.verticalDragMaxHeight){A=ay.verticalDragMaxHeight}else{if(A<ay.verticalDragMinHeight){A=ay.verticalDragMinHeight}}au.height(A+"px");i=t-A;ad(I)}}function ak(aJ,aL,aI,s){var aN="before",aK="after",aM;if(aL=="os"){aL=/Mac/.test(navigator.platform)?"after":"split"}if(aL==aN){aK=aL}else{if(aL==aK){aN=aL;aM=aI;aI=s;s=aM}}aJ[aN](aI)[aK](s)}function aD(aI,s,aJ){return function(){H(aI,s,this,aJ);this.blur();return false}}function H(aL,aK,aO,aN){aO=b(aO).addClass("jspActive");var aM,aJ,aI=true,s=function(){if(aL!==0){Q.scrollByX(aL*ay.arrowButtonSpeed)}if(aK!==0){Q.scrollByY(aK*ay.arrowButtonSpeed)}aJ=setTimeout(s,aI?ay.initialDelay:ay.arrowRepeatFreq);aI=false};s();aM=aN?"mouseout.jsp":"mouseup.jsp";aN=aN||b("html");aN.bind(aM,function(){aO.removeClass("jspActive");aJ&&clearTimeout(aJ);aJ=null;aN.unbind(aM)})}function p(){w();if(az){ap.bind("mousedown.jsp",function(aN){if(aN.originalTarget===c||aN.originalTarget==aN.currentTarget){var aL=b(this),aO=aL.offset(),aM=aN.pageY-aO.top-I,aJ,aI=true,s=function(){var aR=aL.offset(),aS=aN.pageY-aR.top-A/2,aP=v*ay.scrollPagePercent,aQ=i*aP/(Z-v);if(aM<0){if(I-aQ>aS){Q.scrollByY(-aP)}else{V(aS)}}else{if(aM>0){if(I+aQ<aS){Q.scrollByY(aP)}else{V(aS)}}else{aK();return}}aJ=setTimeout(s,aI?ay.initialDelay:ay.trackClickRepeatFreq);aI=false},aK=function(){aJ&&clearTimeout(aJ);aJ=null;b(document).unbind("mouseup.jsp",aK)};s();b(document).bind("mouseup.jsp",aK);return false}})}if(aE){G.bind("mousedown.jsp",function(aN){if(aN.originalTarget===c||aN.originalTarget==aN.currentTarget){var aL=b(this),aO=aL.offset(),aM=aN.pageX-aO.left-aa,aJ,aI=true,s=function(){var aR=aL.offset(),aS=aN.pageX-aR.left-at/2,aP=aj*ay.scrollPagePercent,aQ=j*aP/(T-aj);if(aM<0){if(aa-aQ>aS){Q.scrollByX(-aP)}else{W(aS)}}else{if(aM>0){if(aa+aQ<aS){Q.scrollByX(aP)}else{W(aS)}}else{aK();return}}aJ=setTimeout(s,aI?ay.initialDelay:ay.trackClickRepeatFreq);aI=false},aK=function(){aJ&&clearTimeout(aJ);aJ=null;b(document).unbind("mouseup.jsp",aK)};s();b(document).bind("mouseup.jsp",aK);return false}})}}function w(){if(G){G.unbind("mousedown.jsp")}if(ap){ap.unbind("mousedown.jsp")}}function aw(){b("html").unbind("dragstart.jsp selectstart.jsp mousemove.jsp mouseup.jsp mouseleave.jsp");if(au){au.removeClass("jspActive")}if(h){h.removeClass("jspActive")}}function V(s,aI){if(!az){return}if(s<0){s=0}else{if(s>i){s=i}}if(aI===c){aI=ay.animateScroll}if(aI){Q.animate(au,"top",s,ad)}else{au.css("top",s);ad(s)}}function ad(aI){if(aI===c){aI=au.position().top}al.scrollTop(0);I=aI;var aL=I===0,aJ=I==i,aK=aI/i,s=-aK*(Z-v);if(ai!=aL||aG!=aJ){ai=aL;aG=aJ;D.trigger("jsp-arrow-change",[ai,aG,P,k])}u(aL,aJ);Y.css("top",s);D.trigger("jsp-scroll-y",[-s,aL,aJ]).trigger("scroll")}function W(aI,s){if(!aE){return}if(aI<0){aI=0}else{if(aI>j){aI=j}}if(s===c){s=ay.animateScroll}if(s){Q.animate(h,"left",aI,ae)
+}else{h.css("left",aI);ae(aI)}}function ae(aI){if(aI===c){aI=h.position().left}al.scrollTop(0);aa=aI;var aL=aa===0,aK=aa==j,aJ=aI/j,s=-aJ*(T-aj);if(P!=aL||k!=aK){P=aL;k=aK;D.trigger("jsp-arrow-change",[ai,aG,P,k])}r(aL,aK);Y.css("left",s);D.trigger("jsp-scroll-x",[-s,aL,aK]).trigger("scroll")}function u(aI,s){if(ay.showArrows){aq[aI?"addClass":"removeClass"]("jspDisabled");af[s?"addClass":"removeClass"]("jspDisabled")}}function r(aI,s){if(ay.showArrows){ax[aI?"addClass":"removeClass"]("jspDisabled");x[s?"addClass":"removeClass"]("jspDisabled")}}function M(s,aI){var aJ=s/(Z-v);V(aJ*i,aI)}function N(aI,s){var aJ=aI/(T-aj);W(aJ*j,s)}function ab(aV,aQ,aJ){var aN,aK,aL,s=0,aU=0,aI,aP,aO,aS,aR,aT;try{aN=b(aV)}catch(aM){return}aK=aN.outerHeight();aL=aN.outerWidth();al.scrollTop(0);al.scrollLeft(0);while(!aN.is(".jspPane")){s+=aN.position().top;aU+=aN.position().left;aN=aN.offsetParent();if(/^body|html$/i.test(aN[0].nodeName)){return}}aI=aA();aO=aI+v;if(s<aI||aQ){aR=s-ay.verticalGutter}else{if(s+aK>aO){aR=s-v+aK+ay.verticalGutter}}if(aR){M(aR,aJ)}aP=aC();aS=aP+aj;if(aU<aP||aQ){aT=aU-ay.horizontalGutter}else{if(aU+aL>aS){aT=aU-aj+aL+ay.horizontalGutter}}if(aT){N(aT,aJ)}}function aC(){return -Y.position().left}function aA(){return -Y.position().top}function K(){var s=Z-v;return(s>20)&&(s-aA()<10)}function B(){var s=T-aj;return(s>20)&&(s-aC()<10)}function ag(){al.unbind(ac).bind(ac,function(aL,aM,aK,aI){var aJ=aa,s=I;Q.scrollBy(aK*ay.mouseWheelSpeed,-aI*ay.mouseWheelSpeed,false);return aJ==aa&&s==I})}function n(){al.unbind(ac)}function aB(){return false}function J(){Y.find(":input,a").unbind("focus.jsp").bind("focus.jsp",function(s){ab(s.target,false)})}function E(){Y.find(":input,a").unbind("focus.jsp")}function S(){var s,aI,aK=[];aE&&aK.push(am[0]);az&&aK.push(U[0]);Y.focus(function(){D.focus()});D.attr("tabindex",0).unbind("keydown.jsp keypress.jsp").bind("keydown.jsp",function(aN){if(aN.target!==this&&!(aK.length&&b(aN.target).closest(aK).length)){return}var aM=aa,aL=I;switch(aN.keyCode){case 40:case 38:case 34:case 32:case 33:case 39:case 37:s=aN.keyCode;aJ();break;case 35:M(Z-v);s=null;break;case 36:M(0);s=null;break}aI=aN.keyCode==s&&aM!=aa||aL!=I;return !aI}).bind("keypress.jsp",function(aL){if(aL.keyCode==s){aJ()}return !aI});if(ay.hideFocus){D.css("outline","none");if("hideFocus" in al[0]){D.attr("hideFocus",true)}}else{D.css("outline","");if("hideFocus" in al[0]){D.attr("hideFocus",false)}}function aJ(){var aM=aa,aL=I;switch(s){case 40:Q.scrollByY(ay.keyboardSpeed,false);break;case 38:Q.scrollByY(-ay.keyboardSpeed,false);break;case 34:case 32:Q.scrollByY(v*ay.scrollPagePercent,false);break;case 33:Q.scrollByY(-v*ay.scrollPagePercent,false);break;case 39:Q.scrollByX(ay.keyboardSpeed,false);break;case 37:Q.scrollByX(-ay.keyboardSpeed,false);break}aI=aM!=aa||aL!=I;return aI}}function R(){D.attr("tabindex","-1").removeAttr("tabindex").unbind("keydown.jsp keypress.jsp")}function C(){if(location.hash&&location.hash.length>1){var aK,aI,aJ=escape(location.hash.substr(1));try{aK=b("#"+aJ+', a[name="'+aJ+'"]')}catch(s){return}if(aK.length&&Y.find(aJ)){if(al.scrollTop()===0){aI=setInterval(function(){if(al.scrollTop()>0){ab(aK,true);b(document).scrollTop(al.position().top);clearInterval(aI)}},50)}else{ab(aK,true);b(document).scrollTop(al.position().top)}}}}function m(){if(b(document.body).data("jspHijack")){return}b(document.body).data("jspHijack",true);b(document.body).delegate("a[href*=#]","click",function(s){var aI=this.href.substr(0,this.href.indexOf("#")),aK=location.href,aO,aP,aJ,aM,aL,aN;if(location.href.indexOf("#")!==-1){aK=location.href.substr(0,location.href.indexOf("#"))}if(aI!==aK){return}aO=escape(this.href.substr(this.href.indexOf("#")+1));aP;try{aP=b("#"+aO+', a[name="'+aO+'"]')}catch(aQ){return}if(!aP.length){return}aJ=aP.closest(".jspScrollable");aM=aJ.data("jsp");aM.scrollToElement(aP,true);if(aJ[0].scrollIntoView){aL=b(a).scrollTop();aN=aP.offset().top;if(aN<aL||aN>aL+b(a).height()){aJ[0].scrollIntoView()}}s.preventDefault()
+})}function an(){var aJ,aI,aL,aK,aM,s=false;al.unbind("touchstart.jsp touchmove.jsp touchend.jsp click.jsp-touchclick").bind("touchstart.jsp",function(aN){var aO=aN.originalEvent.touches[0];aJ=aC();aI=aA();aL=aO.pageX;aK=aO.pageY;aM=false;s=true}).bind("touchmove.jsp",function(aQ){if(!s){return}var aP=aQ.originalEvent.touches[0],aO=aa,aN=I;Q.scrollTo(aJ+aL-aP.pageX,aI+aK-aP.pageY);aM=aM||Math.abs(aL-aP.pageX)>5||Math.abs(aK-aP.pageY)>5;return aO==aa&&aN==I}).bind("touchend.jsp",function(aN){s=false}).bind("click.jsp-touchclick",function(aN){if(aM){aM=false;return false}})}function g(){var s=aA(),aI=aC();D.removeClass("jspScrollable").unbind(".jsp");D.replaceWith(ao.append(Y.children()));ao.scrollTop(s);ao.scrollLeft(aI);if(av){clearInterval(av)}}b.extend(Q,{reinitialise:function(aI){aI=b.extend({},ay,aI);ar(aI)},scrollToElement:function(aJ,aI,s){ab(aJ,aI,s)},scrollTo:function(aJ,s,aI){N(aJ,aI);M(s,aI)},scrollToX:function(aI,s){N(aI,s)},scrollToY:function(s,aI){M(s,aI)},scrollToPercentX:function(aI,s){N(aI*(T-aj),s)},scrollToPercentY:function(aI,s){M(aI*(Z-v),s)},scrollBy:function(aI,s,aJ){Q.scrollByX(aI,aJ);Q.scrollByY(s,aJ)},scrollByX:function(s,aJ){var aI=aC()+Math[s<0?"floor":"ceil"](s),aK=aI/(T-aj);W(aK*j,aJ)},scrollByY:function(s,aJ){var aI=aA()+Math[s<0?"floor":"ceil"](s),aK=aI/(Z-v);V(aK*i,aJ)},positionDragX:function(s,aI){W(s,aI)},positionDragY:function(aI,s){V(aI,s)},animate:function(aI,aL,s,aK){var aJ={};aJ[aL]=s;aI.animate(aJ,{duration:ay.animateDuration,easing:ay.animateEase,queue:false,step:aK})},getContentPositionX:function(){return aC()},getContentPositionY:function(){return aA()},getContentWidth:function(){return T},getContentHeight:function(){return Z},getPercentScrolledX:function(){return aC()/(T-aj)},getPercentScrolledY:function(){return aA()/(Z-v)},getIsScrollableH:function(){return aE},getIsScrollableV:function(){return az},getContentPane:function(){return Y},scrollToBottom:function(s){V(i,s)},hijackInternalLinks:b.noop,destroy:function(){g()}});ar(O)}e=b.extend({},b.fn.jScrollPane.defaults,e);b.each(["mouseWheelSpeed","arrowButtonSpeed","trackClickSpeed","keyboardSpeed"],function(){e[this]=e[this]||e.speed});return this.each(function(){var f=b(this),g=f.data("jsp");if(g){g.reinitialise(e)}else{b("script",f).filter('[type="text/javascript"],:not([type])').remove();g=new d(f,e);f.data("jsp",g)}})};b.fn.jScrollPane.defaults={showArrows:false,maintainPosition:true,stickToBottom:false,stickToRight:false,clickOnTrack:true,autoReinitialise:false,autoReinitialiseDelay:500,verticalDragMinHeight:0,verticalDragMaxHeight:99999,horizontalDragMinWidth:0,horizontalDragMaxWidth:99999,contentWidth:c,animateScroll:false,animateDuration:300,animateEase:"linear",hijackInternalLinks:false,verticalGutter:4,horizontalGutter:4,mouseWheelSpeed:0,arrowButtonSpeed:0,arrowRepeatFreq:50,arrowScrollOnHover:false,trackClickSpeed:0,trackClickRepeatFreq:70,verticalArrowPositions:"split",horizontalArrowPositions:"split",enableKeyboardNavigation:true,hideFocus:false,keyboardSpeed:0,initialDelay:300,speed:30,scrollPagePercent:0.8}})(jQuery,this);
+
+/*! jQuery Validation Plugin - v1.11.1 - 3/22/2013\n* https://github.com/jzaefferer/jquery-validation
+* Copyright (c) 2013 Jörn Zaefferer; Licensed MIT */
+(function(t){t.extend(t.fn,{validate:function(e){if(!this.length)return e&&e.debug&&window.console&&console.warn("Nothing selected, can't validate, returning nothing."),void 0;var i=t.data(this[0],"validator");return i?i:(this.attr("novalidate","novalidate"),i=new t.validator(e,this[0]),t.data(this[0],"validator",i),i.settings.onsubmit&&(this.validateDelegate(":submit","click",function(e){i.settings.submitHandler&&(i.submitButton=e.target),t(e.target).hasClass("cancel")&&(i.cancelSubmit=!0),void 0!==t(e.target).attr("formnovalidate")&&(i.cancelSubmit=!0)}),this.submit(function(e){function s(){var s;return i.settings.submitHandler?(i.submitButton&&(s=t("<input type='hidden'/>").attr("name",i.submitButton.name).val(t(i.submitButton).val()).appendTo(i.currentForm)),i.settings.submitHandler.call(i,i.currentForm,e),i.submitButton&&s.remove(),!1):!0}return i.settings.debug&&e.preventDefault(),i.cancelSubmit?(i.cancelSubmit=!1,s()):i.form()?i.pendingRequest?(i.formSubmitted=!0,!1):s():(i.focusInvalid(),!1)})),i)},valid:function(){if(t(this[0]).is("form"))return this.validate().form();var e=!0,i=t(this[0].form).validate();return this.each(function(){e=e&&i.element(this)}),e},removeAttrs:function(e){var i={},s=this;return t.each(e.split(/\s/),function(t,e){i[e]=s.attr(e),s.removeAttr(e)}),i},rules:function(e,i){var s=this[0];if(e){var r=t.data(s.form,"validator").settings,n=r.rules,a=t.validator.staticRules(s);switch(e){case"add":t.extend(a,t.validator.normalizeRule(i)),delete a.messages,n[s.name]=a,i.messages&&(r.messages[s.name]=t.extend(r.messages[s.name],i.messages));break;case"remove":if(!i)return delete n[s.name],a;var u={};return t.each(i.split(/\s/),function(t,e){u[e]=a[e],delete a[e]}),u}}var o=t.validator.normalizeRules(t.extend({},t.validator.classRules(s),t.validator.attributeRules(s),t.validator.dataRules(s),t.validator.staticRules(s)),s);if(o.required){var l=o.required;delete o.required,o=t.extend({required:l},o)}return o}}),t.extend(t.expr[":"],{blank:function(e){return!t.trim(""+t(e).val())},filled:function(e){return!!t.trim(""+t(e).val())},unchecked:function(e){return!t(e).prop("checked")}}),t.validator=function(e,i){this.settings=t.extend(!0,{},t.validator.defaults,e),this.currentForm=i,this.init()},t.validator.format=function(e,i){return 1===arguments.length?function(){var i=t.makeArray(arguments);return i.unshift(e),t.validator.format.apply(this,i)}:(arguments.length>2&&i.constructor!==Array&&(i=t.makeArray(arguments).slice(1)),i.constructor!==Array&&(i=[i]),t.each(i,function(t,i){e=e.replace(RegExp("\\{"+t+"\\}","g"),function(){return i})}),e)},t.extend(t.validator,{defaults:{messages:{},groups:{},rules:{},errorClass:"error",validClass:"valid",errorElement:"label",focusInvalid:!0,errorContainer:t([]),errorLabelContainer:t([]),onsubmit:!0,ignore:":hidden",ignoreTitle:!1,onfocusin:function(t){this.lastActive=t,this.settings.focusCleanup&&!this.blockFocusCleanup&&(this.settings.unhighlight&&this.settings.unhighlight.call(this,t,this.settings.errorClass,this.settings.validClass),this.addWrapper(this.errorsFor(t)).hide())},onfocusout:function(t){this.checkable(t)||!(t.name in this.submitted)&&this.optional(t)||this.element(t)},onkeyup:function(t,e){(9!==e.which||""!==this.elementValue(t))&&(t.name in this.submitted||t===this.lastElement)&&this.element(t)},onclick:function(t){t.name in this.submitted?this.element(t):t.parentNode.name in this.submitted&&this.element(t.parentNode)},highlight:function(e,i,s){"radio"===e.type?this.findByName(e.name).addClass(i).removeClass(s):t(e).addClass(i).removeClass(s)},unhighlight:function(e,i,s){"radio"===e.type?this.findByName(e.name).removeClass(i).addClass(s):t(e).removeClass(i).addClass(s)}},setDefaults:function(e){t.extend(t.validator.defaults,e)},messages:{required:"This field is required.",remote:"Please fix this field.",email:"Please enter a valid email address.",url:"Please enter a valid URL.",date:"Please enter a valid date.",dateISO:"Please enter a valid date (ISO).",number:"Please enter a valid number.",digits:"Please enter only digits.",creditcard:"Please enter a valid credit card number.",equalTo:"Please enter the same value again.",maxlength:t.validator.format("Please enter no more than {0} characters."),minlength:t.validator.format("Please enter at least {0} characters."),rangelength:t.validator.format("Please enter a value between {0} and {1} characters long."),range:t.validator.format("Please enter a value between {0} and {1}."),max:t.validator.format("Please enter a value less than or equal to {0}."),min:t.validator.format("Please enter a value greater than or equal to {0}.")},autoCreateRanges:!1,prototype:{init:function(){function e(e){var i=t.data(this[0].form,"validator"),s="on"+e.type.replace(/^validate/,"");i.settings[s]&&i.settings[s].call(i,this[0],e)}this.labelContainer=t(this.settings.errorLabelContainer),this.errorContext=this.labelContainer.length&&this.labelContainer||t(this.currentForm),this.containers=t(this.settings.errorContainer).add(this.settings.errorLabelContainer),this.submitted={},this.valueCache={},this.pendingRequest=0,this.pending={},this.invalid={},this.reset();var i=this.groups={};t.each(this.settings.groups,function(e,s){"string"==typeof s&&(s=s.split(/\s/)),t.each(s,function(t,s){i[s]=e})});var s=this.settings.rules;t.each(s,function(e,i){s[e]=t.validator.normalizeRule(i)}),t(this.currentForm).validateDelegate(":text, [type='password'], [type='file'], select, textarea, [type='number'], [type='search'] ,[type='tel'], [type='url'], [type='email'], [type='datetime'], [type='date'], [type='month'], [type='week'], [type='time'], [type='datetime-local'], [type='range'], [type='color'] ","focusin focusout keyup",e).validateDelegate("[type='radio'], [type='checkbox'], select, option","click",e),this.settings.invalidHandler&&t(this.currentForm).bind("invalid-form.validate",this.settings.invalidHandler)},form:function(){return this.checkForm(),t.extend(this.submitted,this.errorMap),this.invalid=t.extend({},this.errorMap),this.valid()||t(this.currentForm).triggerHandler("invalid-form",[this]),this.showErrors(),this.valid()},checkForm:function(){this.prepareForm();for(var t=0,e=this.currentElements=this.elements();e[t];t++)this.check(e[t]);return this.valid()},element:function(e){e=this.validationTargetFor(this.clean(e)),this.lastElement=e,this.prepareElement(e),this.currentElements=t(e);var i=this.check(e)!==!1;return i?delete this.invalid[e.name]:this.invalid[e.name]=!0,this.numberOfInvalids()||(this.toHide=this.toHide.add(this.containers)),this.showErrors(),i},showErrors:function(e){if(e){t.extend(this.errorMap,e),this.errorList=[];for(var i in e)this.errorList.push({message:e[i],element:this.findByName(i)[0]});this.successList=t.grep(this.successList,function(t){return!(t.name in e)})}this.settings.showErrors?this.settings.showErrors.call(this,this.errorMap,this.errorList):this.defaultShowErrors()},resetForm:function(){t.fn.resetForm&&t(this.currentForm).resetForm(),this.submitted={},this.lastElement=null,this.prepareForm(),this.hideErrors(),this.elements().removeClass(this.settings.errorClass).removeData("previousValue")},numberOfInvalids:function(){return this.objectLength(this.invalid)},objectLength:function(t){var e=0;for(var i in t)e++;return e},hideErrors:function(){this.addWrapper(this.toHide).hide()},valid:function(){return 0===this.size()},size:function(){return this.errorList.length},focusInvalid:function(){if(this.settings.focusInvalid)try{t(this.findLastActive()||this.errorList.length&&this.errorList[0].element||[]).filter(":visible").focus().trigger("focusin")}catch(e){}},findLastActive:function(){var e=this.lastActive;return e&&1===t.grep(this.errorList,function(t){return t.element.name===e.name}).length&&e},elements:function(){var e=this,i={};return t(this.currentForm).find("input, select, textarea").not(":submit, :reset, :image, [disabled]").not(this.settings.ignore).filter(function(){return!this.name&&e.settings.debug&&window.console&&console.error("%o has no name assigned",this),this.name in i||!e.objectLength(t(this).rules())?!1:(i[this.name]=!0,!0)})},clean:function(e){return t(e)[0]},errors:function(){var e=this.settings.errorClass.replace(" ",".");return t(this.settings.errorElement+"."+e,this.errorContext)},reset:function(){this.successList=[],this.errorList=[],this.errorMap={},this.toShow=t([]),this.toHide=t([]),this.currentElements=t([])},prepareForm:function(){this.reset(),this.toHide=this.errors().add(this.containers)},prepareElement:function(t){this.reset(),this.toHide=this.errorsFor(t)},elementValue:function(e){var i=t(e).attr("type"),s=t(e).val();return"radio"===i||"checkbox"===i?t("input[name='"+t(e).attr("name")+"']:checked").val():"string"==typeof s?s.replace(/\r/g,""):s},check:function(e){e=this.validationTargetFor(this.clean(e));var i,s=t(e).rules(),r=!1,n=this.elementValue(e);for(var a in s){var u={method:a,parameters:s[a]};try{if(i=t.validator.methods[a].call(this,n,e,u.parameters),"dependency-mismatch"===i){r=!0;continue}if(r=!1,"pending"===i)return this.toHide=this.toHide.not(this.errorsFor(e)),void 0;if(!i)return this.formatAndAdd(e,u),!1}catch(o){throw this.settings.debug&&window.console&&console.log("Exception occurred when checking element "+e.id+", check the '"+u.method+"' method.",o),o}}return r?void 0:(this.objectLength(s)&&this.successList.push(e),!0)},customDataMessage:function(e,i){return t(e).data("msg-"+i.toLowerCase())||e.attributes&&t(e).attr("data-msg-"+i.toLowerCase())},customMessage:function(t,e){var i=this.settings.messages[t];return i&&(i.constructor===String?i:i[e])},findDefined:function(){for(var t=0;arguments.length>t;t++)if(void 0!==arguments[t])return arguments[t];return void 0},defaultMessage:function(e,i){return this.findDefined(this.customMessage(e.name,i),this.customDataMessage(e,i),!this.settings.ignoreTitle&&e.title||void 0,t.validator.messages[i],"<strong>Warning: No message defined for "+e.name+"</strong>")},formatAndAdd:function(e,i){var s=this.defaultMessage(e,i.method),r=/\$?\{(\d+)\}/g;"function"==typeof s?s=s.call(this,i.parameters,e):r.test(s)&&(s=t.validator.format(s.replace(r,"{$1}"),i.parameters)),this.errorList.push({message:s,element:e}),this.errorMap[e.name]=s,this.submitted[e.name]=s},addWrapper:function(t){return this.settings.wrapper&&(t=t.add(t.parent(this.settings.wrapper))),t},defaultShowErrors:function(){var t,e;for(t=0;this.errorList[t];t++){var i=this.errorList[t];this.settings.highlight&&this.settings.highlight.call(this,i.element,this.settings.errorClass,this.settings.validClass),this.showLabel(i.element,i.message)}if(this.errorList.length&&(this.toShow=this.toShow.add(this.containers)),this.settings.success)for(t=0;this.successList[t];t++)this.showLabel(this.successList[t]);if(this.settings.unhighlight)for(t=0,e=this.validElements();e[t];t++)this.settings.unhighlight.call(this,e[t],this.settings.errorClass,this.settings.validClass);this.toHide=this.toHide.not(this.toShow),this.hideErrors(),this.addWrapper(this.toShow).show()},validElements:function(){return this.currentElements.not(this.invalidElements())},invalidElements:function(){return t(this.errorList).map(function(){return this.element})},showLabel:function(e,i){var s=this.errorsFor(e);s.length?(s.removeClass(this.settings.validClass).addClass(this.settings.errorClass),s.html(i)):(s=t("<"+this.settings.errorElement+">").attr("for",this.idOrName(e)).addClass(this.settings.errorClass).html(i||""),this.settings.wrapper&&(s=s.hide().show().wrap("<"+this.settings.wrapper+"/>").parent()),this.labelContainer.append(s).length||(this.settings.errorPlacement?this.settings.errorPlacement(s,t(e)):s.insertAfter(e))),!i&&this.settings.success&&(s.text(""),"string"==typeof this.settings.success?s.addClass(this.settings.success):this.settings.success(s,e)),this.toShow=this.toShow.add(s)},errorsFor:function(e){var i=this.idOrName(e);return this.errors().filter(function(){return t(this).attr("for")===i})},idOrName:function(t){return this.groups[t.name]||(this.checkable(t)?t.name:t.id||t.name)},validationTargetFor:function(t){return this.checkable(t)&&(t=this.findByName(t.name).not(this.settings.ignore)[0]),t},checkable:function(t){return/radio|checkbox/i.test(t.type)},findByName:function(e){return t(this.currentForm).find("[name='"+e+"']")},getLength:function(e,i){switch(i.nodeName.toLowerCase()){case"select":return t("option:selected",i).length;case"input":if(this.checkable(i))return this.findByName(i.name).filter(":checked").length}return e.length},depend:function(t,e){return this.dependTypes[typeof t]?this.dependTypes[typeof t](t,e):!0},dependTypes:{"boolean":function(t){return t},string:function(e,i){return!!t(e,i.form).length},"function":function(t,e){return t(e)}},optional:function(e){var i=this.elementValue(e);return!t.validator.methods.required.call(this,i,e)&&"dependency-mismatch"},startRequest:function(t){this.pending[t.name]||(this.pendingRequest++,this.pending[t.name]=!0)},stopRequest:function(e,i){this.pendingRequest--,0>this.pendingRequest&&(this.pendingRequest=0),delete this.pending[e.name],i&&0===this.pendingRequest&&this.formSubmitted&&this.form()?(t(this.currentForm).submit(),this.formSubmitted=!1):!i&&0===this.pendingRequest&&this.formSubmitted&&(t(this.currentForm).triggerHandler("invalid-form",[this]),this.formSubmitted=!1)},previousValue:function(e){return t.data(e,"previousValue")||t.data(e,"previousValue",{old:null,valid:!0,message:this.defaultMessage(e,"remote")})}},classRuleSettings:{required:{required:!0},email:{email:!0},url:{url:!0},date:{date:!0},dateISO:{dateISO:!0},number:{number:!0},digits:{digits:!0},creditcard:{creditcard:!0}},addClassRules:function(e,i){e.constructor===String?this.classRuleSettings[e]=i:t.extend(this.classRuleSettings,e)},classRules:function(e){var i={},s=t(e).attr("class");return s&&t.each(s.split(" "),function(){this in t.validator.classRuleSettings&&t.extend(i,t.validator.classRuleSettings[this])}),i},attributeRules:function(e){var i={},s=t(e),r=s[0].getAttribute("type");for(var n in t.validator.methods){var a;"required"===n?(a=s.get(0).getAttribute(n),""===a&&(a=!0),a=!!a):a=s.attr(n),/min|max/.test(n)&&(null===r||/number|range|text/.test(r))&&(a=Number(a)),a?i[n]=a:r===n&&"range"!==r&&(i[n]=!0)}return i.maxlength&&/-1|2147483647|524288/.test(i.maxlength)&&delete i.maxlength,i},dataRules:function(e){var i,s,r={},n=t(e);for(i in t.validator.methods)s=n.data("rule-"+i.toLowerCase()),void 0!==s&&(r[i]=s);return r},staticRules:function(e){var i={},s=t.data(e.form,"validator");return s.settings.rules&&(i=t.validator.normalizeRule(s.settings.rules[e.name])||{}),i},normalizeRules:function(e,i){return t.each(e,function(s,r){if(r===!1)return delete e[s],void 0;if(r.param||r.depends){var n=!0;switch(typeof r.depends){case"string":n=!!t(r.depends,i.form).length;break;case"function":n=r.depends.call(i,i)}n?e[s]=void 0!==r.param?r.param:!0:delete e[s]}}),t.each(e,function(s,r){e[s]=t.isFunction(r)?r(i):r}),t.each(["minlength","maxlength"],function(){e[this]&&(e[this]=Number(e[this]))}),t.each(["rangelength","range"],function(){var i;e[this]&&(t.isArray(e[this])?e[this]=[Number(e[this][0]),Number(e[this][1])]:"string"==typeof e[this]&&(i=e[this].split(/[\s,]+/),e[this]=[Number(i[0]),Number(i[1])]))}),t.validator.autoCreateRanges&&(e.min&&e.max&&(e.range=[e.min,e.max],delete e.min,delete e.max),e.minlength&&e.maxlength&&(e.rangelength=[e.minlength,e.maxlength],delete e.minlength,delete e.maxlength)),e},normalizeRule:function(e){if("string"==typeof e){var i={};t.each(e.split(/\s/),function(){i[this]=!0}),e=i}return e},addMethod:function(e,i,s){t.validator.methods[e]=i,t.validator.messages[e]=void 0!==s?s:t.validator.messages[e],3>i.length&&t.validator.addClassRules(e,t.validator.normalizeRule(e))},methods:{required:function(e,i,s){if(!this.depend(s,i))return"dependency-mismatch";if("select"===i.nodeName.toLowerCase()){var r=t(i).val();return r&&r.length>0}return this.checkable(i)?this.getLength(e,i)>0:t.trim(e).length>0},email:function(t,e){return this.optional(e)||/^((([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+(\.([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+)*)|((\x22)((((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(([\x01-\x08\x0b\x0c\x0e-\x1f\x7f]|\x21|[\x23-\x5b]|[\x5d-\x7e]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(\\([\x01-\x09\x0b\x0c\x0d-\x7f]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]))))*(((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(\x22)))@((([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.)+(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))$/i.test(t)},url:function(t,e){return this.optional(e)||/^(https?|s?ftp):\/\/(((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:)*@)?(((\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5]))|((([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.)+(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.?)(:\d*)?)(\/((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)+(\/(([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)*)*)?)?(\?((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)|[\uE000-\uF8FF]|\/|\?)*)?(#((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)|\/|\?)*)?$/i.test(t)},date:function(t,e){return this.optional(e)||!/Invalid|NaN/.test(""+new Date(t))},dateISO:function(t,e){return this.optional(e)||/^\d{4}[\/\-]\d{1,2}[\/\-]\d{1,2}$/.test(t)},number:function(t,e){return this.optional(e)||/^-?(?:\d+|\d{1,3}(?:,\d{3})+)?(?:\.\d+)?$/.test(t)},digits:function(t,e){return this.optional(e)||/^\d+$/.test(t)},creditcard:function(t,e){if(this.optional(e))return"dependency-mismatch";if(/[^0-9 \-]+/.test(t))return!1;var i=0,s=0,r=!1;t=t.replace(/\D/g,"");for(var n=t.length-1;n>=0;n--){var a=t.charAt(n);s=parseInt(a,10),r&&(s*=2)>9&&(s-=9),i+=s,r=!r}return 0===i%10},minlength:function(e,i,s){var r=t.isArray(e)?e.length:this.getLength(t.trim(e),i);return this.optional(i)||r>=s},maxlength:function(e,i,s){var r=t.isArray(e)?e.length:this.getLength(t.trim(e),i);return this.optional(i)||s>=r},rangelength:function(e,i,s){var r=t.isArray(e)?e.length:this.getLength(t.trim(e),i);return this.optional(i)||r>=s[0]&&s[1]>=r},min:function(t,e,i){return this.optional(e)||t>=i},max:function(t,e,i){return this.optional(e)||i>=t},range:function(t,e,i){return this.optional(e)||t>=i[0]&&i[1]>=t},equalTo:function(e,i,s){var r=t(s);return this.settings.onfocusout&&r.unbind(".validate-equalTo").bind("blur.validate-equalTo",function(){t(i).valid()}),e===r.val()},remote:function(e,i,s){if(this.optional(i))return"dependency-mismatch";var r=this.previousValue(i);if(this.settings.messages[i.name]||(this.settings.messages[i.name]={}),r.originalMessage=this.settings.messages[i.name].remote,this.settings.messages[i.name].remote=r.message,s="string"==typeof s&&{url:s}||s,r.old===e)return r.valid;r.old=e;var n=this;this.startRequest(i);var a={};return a[i.name]=e,t.ajax(t.extend(!0,{url:s,mode:"abort",port:"validate"+i.name,dataType:"json",data:a,success:function(s){n.settings.messages[i.name].remote=r.originalMessage;var a=s===!0||"true"===s;if(a){var u=n.formSubmitted;n.prepareElement(i),n.formSubmitted=u,n.successList.push(i),delete n.invalid[i.name],n.showErrors()}else{var o={},l=s||n.defaultMessage(i,"remote");o[i.name]=r.message=t.isFunction(l)?l(e):l,n.invalid[i.name]=!0,n.showErrors(o)}r.valid=a,n.stopRequest(i,a)}},s)),"pending"}}}),t.format=t.validator.format})(jQuery),function(t){var e={};if(t.ajaxPrefilter)t.ajaxPrefilter(function(t,i,s){var r=t.port;"abort"===t.mode&&(e[r]&&e[r].abort(),e[r]=s)});else{var i=t.ajax;t.ajax=function(s){var r=("mode"in s?s:t.ajaxSettings).mode,n=("port"in s?s:t.ajaxSettings).port;return"abort"===r?(e[n]&&e[n].abort(),e[n]=i.apply(this,arguments),e[n]):i.apply(this,arguments)}}}(jQuery),function(t){t.extend(t.fn,{validateDelegate:function(e,i,s){return this.bind(i,function(i){var r=t(i.target);return r.is(e)?s.apply(r,arguments):void 0})}})}(jQuery);
+
+/*
+ * Translated default messages for the jQuery validation plugin.
+ * Locale: TR (Turkish; Türkçe)
+ */
+(function ($) {
+    $.extend($.validator.messages, {
+        required: "Bu alanın doldurulması zorunludur.",
+        remote: "Lütfen bu alanı düzeltin.",
+        email: "Lütfen geçerli bir e-posta adresi giriniz.",
+        url: "Lütfen geçerli bir web adresi (URL) giriniz.",
+        date: "Lütfen geçerli bir tarih giriniz.",
+        dateISO: "Lütfen geçerli bir tarih giriniz(ISO formatında)",
+        number: "Lütfen geçerli bir sayı giriniz.",
+        digits: "Lütfen sadece sayısal karakterler giriniz.",
+        creditcard: "Lütfen geçerli bir kredi kartı giriniz.",
+        equalTo: "Lütfen aynı değeri tekrar giriniz.",
+        accept: "Lütfen geçerli uzantıya sahip bir değer giriniz.",
+        maxlength: $.validator.format("Lütfen en fazla {0} karakter uzunluğunda bir değer giriniz."),
+        minlength: $.validator.format("Lütfen en az {0} karakter uzunluğunda bir değer giriniz."),
+        rangelength: $.validator.format("Lütfen en az {0} ve en fazla {1} uzunluğunda bir değer giriniz."),
+        range: $.validator.format("Lütfen {0} ile {1} arasında bir değer giriniz."),
+        max: $.validator.format("Lütfen {0} değerine eşit ya da daha küçük bir değer giriniz."),
+        min: $.validator.format("Lütfen {0} değerine eşit ya da daha büyük bir değer giriniz.")
+    });
+}(jQuery));
+
+
+
+
+/**
+ * jCarouselLite - jQuery plugin to navigate images/any content in a carousel style widget.
+ * @requires jQuery v1.2 or above
+ *
+ * http://gmarwaha.com/jquery/jcarousellite/
+ *
+ * Copyright (c) 2007 Ganeshji Marwaha (gmarwaha.com)
+ * Dual licensed under the MIT and GPL licenses:
+ * http://www.opensource.org/licenses/mit-license.php
+ * http://www.gnu.org/licenses/gpl.html
+ *
+ * Version: 1.0.1
+ * Note: Requires jquery 1.2 or above from version 1.0.1
+ */
+
+/**
+ * Creates a carousel-style navigation widget for images/any-content from a simple HTML markup.
+ *
+ * The HTML markup that is used to build the carousel can be as simple as...
+ *
+ *  <div class="carousel">
+ *      <ul>
+ *          <li><img src="image/1.jpg" alt="1"></li>
+ *          <li><img src="image/2.jpg" alt="2"></li>
+ *          <li><img src="image/3.jpg" alt="3"></li>
+ *      </ul>
+ *  </div>
+ *
+ * As you can see, this snippet is nothing but a simple div containing an unordered list of images.
+ * You don't need any special "class" attribute, or a special "css" file for this plugin.
+ * I am using a class attribute just for the sake of explanation here.
+ *
+ * To navigate the elements of the carousel, you need some kind of navigation buttons.
+ * For example, you will need a "previous" button to go backward, and a "next" button to go forward.
+ * This need not be part of the carousel "div" itself. It can be any element in your page.
+ * Lets assume that the following elements in your document can be used as next, and prev buttons...
+ *
+ * <button class="prev">&lt;&lt;</button>
+ * <button class="next">&gt;&gt;</button>
+ *
+ * Now, all you need to do is call the carousel component on the div element that represents it, and pass in the
+ * navigation buttons as options.
+ *
+ * $(".carousel").jCarouselLite({
+ *      btnNext: ".next",
+ *      btnPrev: ".prev"
+ * });
+ *
+ * That's it, you would have now converted your raw div, into a magnificient carousel.
+ *
+ * There are quite a few other options that you can use to customize it though.
+ * Each will be explained with an example below.
+ *
+ * @param an options object - You can specify all the options shown below as an options object param.
+ *
+ * @option btnPrev, btnNext : string - no defaults
+ * @example
+ * $(".carousel").jCarouselLite({
+ *      btnNext: ".next",
+ *      btnPrev: ".prev"
+ * });
+ * @desc Creates a basic carousel. Clicking "btnPrev" navigates backwards and "btnNext" navigates forward.
+ *
+ * @option btnGo - array - no defaults
+ * @example
+ * $(".carousel").jCarouselLite({
+ *      btnNext: ".next",
+ *      btnPrev: ".prev",
+ *      btnGo: [".0", ".1", ".2"]
+ * });
+ * @desc If you don't want next and previous buttons for navigation, instead you prefer custom navigation based on
+ * the item number within the carousel, you can use this option. Just supply an array of selectors for each element
+ * in the carousel. The index of the array represents the index of the element. What i mean is, if the
+ * first element in the array is ".0", it means that when the element represented by ".0" is clicked, the carousel
+ * will slide to the first element and so on and so forth. This feature is very powerful. For example, i made a tabbed
+ * interface out of it by making my navigation elements styled like tabs in css. As the carousel is capable of holding
+ * any content, not just images, you can have a very simple tabbed navigation in minutes without using any other plugin.
+ * The best part is that, the tab will "slide" based on the provided effect. :-)
+ *
+ * @option mouseWheel : boolean - default is false
+ * @example
+ * $(".carousel").jCarouselLite({
+ *      mouseWheel: true
+ * });
+ * @desc The carousel can also be navigated using the mouse wheel interface of a scroll mouse instead of using buttons.
+ * To get this feature working, you have to do 2 things. First, you have to include the mouse-wheel plugin from brandon.
+ * Second, you will have to set the option "mouseWheel" to true. That's it, now you will be able to navigate your carousel
+ * using the mouse wheel. Using buttons and mouseWheel or not mutually exclusive. You can still have buttons for navigation
+ * as well. They complement each other. To use both together, just supply the options required for both as shown below.
+ * @example
+ * $(".carousel").jCarouselLite({
+ *      btnNext: ".next",
+ *      btnPrev: ".prev",
+ *      mouseWheel: true
+ * });
+ *
+ * @option auto : number - default is null, meaning autoscroll is disabled by default
+ * @example
+ * $(".carousel").jCarouselLite({
+ *      auto: 800,
+ *      speed: 500
+ * });
+ * @desc You can make your carousel auto-navigate itself by specfying a millisecond value in this option.
+ * The value you specify is the amount of time between 2 slides. The default is null, and that disables auto scrolling.
+ * Specify this value and magically your carousel will start auto scrolling.
+ *
+ * @option speed : number - 200 is default
+ * @example
+ * $(".carousel").jCarouselLite({
+ *      btnNext: ".next",
+ *      btnPrev: ".prev",
+ *      speed: 800
+ * });
+ * @desc Specifying a speed will slow-down or speed-up the sliding speed of your carousel. Try it out with
+ * different speeds like 800, 600, 1500 etc. Providing 0, will remove the slide effect.
+ *
+ * @option easing : string - no easing effects by default.
+ * @example
+ * $(".carousel").jCarouselLite({
+ *      btnNext: ".next",
+ *      btnPrev: ".prev",
+ *      easing: "bounceout"
+ * });
+ * @desc You can specify any easing effect. Note: You need easing plugin for that. Once specified,
+ * the carousel will slide based on the provided easing effect.
+ *
+ * @option vertical : boolean - default is false
+ * @example
+ * $(".carousel").jCarouselLite({
+ *      btnNext: ".next",
+ *      btnPrev: ".prev",
+ *      vertical: true
+ * });
+ * @desc Determines the direction of the carousel. true, means the carousel will display vertically. The next and
+ * prev buttons will slide the items vertically as well. The default is false, which means that the carousel will
+ * display horizontally. The next and prev items will slide the items from left-right in this case.
+ *
+ * @option circular : boolean - default is true
+ * @example
+ * $(".carousel").jCarouselLite({
+ *      btnNext: ".next",
+ *      btnPrev: ".prev",
+ *      circular: false
+ * });
+ * @desc Setting it to true enables circular navigation. This means, if you click "next" after you reach the last
+ * element, you will automatically slide to the first element and vice versa. If you set circular to false, then
+ * if you click on the "next" button after you reach the last element, you will stay in the last element itself
+ * and similarly for "previous" button and first element.
+ *
+ * @option visible : number - default is 3
+ * @example
+ * $(".carousel").jCarouselLite({
+ *      btnNext: ".next",
+ *      btnPrev: ".prev",
+ *      visible: 4
+ * });
+ * @desc This specifies the number of items visible at all times within the carousel. The default is 3.
+ * You are even free to experiment with real numbers. Eg: "3.5" will have 3 items fully visible and the
+ * last item half visible. This gives you the effect of showing the user that there are more images to the right.
+ *
+ * @option start : number - default is 0
+ * @example
+ * $(".carousel").jCarouselLite({
+ *      btnNext: ".next",
+ *      btnPrev: ".prev",
+ *      start: 2
+ * });
+ * @desc You can specify from which item the carousel should start. Remember, the first item in the carousel
+ * has a start of 0, and so on.
+ *
+ * @option scrool : number - default is 1
+ * @example
+ * $(".carousel").jCarouselLite({
+ *      btnNext: ".next",
+ *      btnPrev: ".prev",
+ *      scroll: 2
+ * });
+ * @desc The number of items that should scroll/slide when you click the next/prev navigation buttons. By
+ * default, only one item is scrolled, but you may set it to any number. Eg: setting it to "2" will scroll
+ * 2 items when you click the next or previous buttons.
+ *
+ * @option beforeStart, afterEnd : function - callbacks
+ * @example
+ * $(".carousel").jCarouselLite({
+ *      btnNext: ".next",
+ *      btnPrev: ".prev",
+ *      beforeStart: function(a) {
+ *          alert("Before animation starts:" + a);
+ *      },
+ *      afterEnd: function(a) {
+ *          alert("After animation ends:" + a);
+ *      }
+ * });
+ * @desc If you wanted to do some logic in your page before the slide starts and after the slide ends, you can
+ * register these 2 callbacks. The functions will be passed an argument that represents an array of elements that
+ * are visible at the time of callback.
+ *
+ *
+ * @cat Plugins/Image Gallery
+ * @author Ganeshji Marwaha/ganeshread@gmail.com
+ */
+
+(function($) {                                          // Compliant with jquery.noConflict()
+    $.fn.jCarouselLite = function(o) {
+        o = $.extend({
+            btnPrev: null,
+            btnNext: null,
+            btnGo: null,
+            mouseWheel: false,
+            auto: null,
+
+            speed: 200,
+            easing: null,
+
+            vertical: false,
+            circular: true,
+            visible: 3,
+            start: 0,
+            scroll: 1,
+
+            beforeStart: null,
+            afterEnd: null
+        }, o || {});
+
+        return this.each(function() {                           // Returns the element collection. Chainable.
+
+            var running = false, animCss=o.vertical?"top":"left", sizeCss=o.vertical?"height":"width";
+            var div = $(this), ul = $("ul", div), tLi = $("li", ul), tl = tLi.size(), v = o.visible;
+
+            if(o.circular) {
+                ul.prepend(tLi.slice(tl-v-1+1).clone())
+                    .append(tLi.slice(0,v).clone());
+                o.start += v;
+            }
+
+            var li = $("li", ul), itemLength = li.size(), curr = o.start;
+            div.css("visibility", "visible");
+
+            li.css({overflow: "hidden", float: o.vertical ? "none" : "left"});
+            ul.css({margin: "0", padding: "0", position: "relative", "list-style-type": "none", "z-index": "1"});
+            div.css({overflow: "hidden", position: "relative", "z-index": "2", left: "0px"});
+
+            var liSize = o.vertical ? height(li) : width(li);   // Full li size(incl margin)-Used for animation
+            var ulSize = liSize * itemLength;                   // size of full ul(total length, not just for the visible items)
+            var divSize = liSize * v;                           // size of entire div(total length for just the visible items)
+
+            li.css({width: li.width(), height: li.height()});
+            ul.css(sizeCss, ulSize+"px").css(animCss, -(curr*liSize));
+
+            div.css(sizeCss, divSize+"px");                     // Width of the DIV. length of visible images
+
+            if(o.btnPrev)
+                $(o.btnPrev).click(function() {
+                    return go(curr-o.scroll);
+                });
+
+            if(o.btnNext)
+                $(o.btnNext).click(function() {
+                    return go(curr+o.scroll);
+                });
+
+            if(o.btnGo)
+                $.each(o.btnGo, function(i, val) {
+                    $(val).click(function() {
+                        return go(o.circular ? o.visible+i : i);
+                    });
+                });
+
+            if(o.mouseWheel && div.mousewheel)
+                div.mousewheel(function(e, d) {
+                    return d>0 ? go(curr-o.scroll) : go(curr+o.scroll);
+                });
+
+            if(o.auto)
+                setInterval(function() {
+                    go(curr+o.scroll);
+                }, o.auto+o.speed);
+
+            function vis() {
+                return li.slice(curr).slice(0,v);
+            };
+
+            function go(to) {
+                if(!running) {
+
+                    if(o.beforeStart)
+                        o.beforeStart.call(this, vis());
+
+                    if(o.circular) {            // If circular we are in first or last, then goto the other end
+                        if(to<=o.start-v-1) {           // If first, then goto last
+                            ul.css(animCss, -((itemLength-(v*2))*liSize)+"px");
+                            // If "scroll" > 1, then the "to" might not be equal to the condition; it can be lesser depending on the number of elements.
+                            curr = to==o.start-v-1 ? itemLength-(v*2)-1 : itemLength-(v*2)-o.scroll;
+                        } else if(to>=itemLength-v+1) { // If last, then goto first
+                            ul.css(animCss, -( (v) * liSize ) + "px" );
+                            // If "scroll" > 1, then the "to" might not be equal to the condition; it can be greater depending on the number of elements.
+                            curr = to==itemLength-v+1 ? v+1 : v+o.scroll;
+                        } else curr = to;
+                    } else {                    // If non-circular and to points to first or last, we just return.
+                        if(to<0 || to>itemLength-v) return;
+                        else curr = to;
+                    }                           // If neither overrides it, the curr will still be "to" and we can proceed.
+
+                    running = true;
+
+                    ul.animate(
+                            animCss == "left" ? { left: -(curr*liSize) } : { top: -(curr*liSize) } , o.speed, o.easing,
+                        function() {
+                            if(o.afterEnd)
+                                o.afterEnd.call(this, vis());
+                            running = false;
+                        }
+                    );
+                    // Disable buttons when the carousel reaches the last/first, and enable when not
+                    if(!o.circular) {
+                        $(o.btnPrev + "," + o.btnNext).removeClass("disabled");
+                        $( (curr-o.scroll<0 && o.btnPrev)
+                                ||
+                                (curr+o.scroll > itemLength-v && o.btnNext)
+                                ||
+                                []
+                        ).addClass("disabled");
+                    }
+
+                }
+                return false;
+            };
+        });
+    };
+
+    function css(el, prop) {
+        return parseInt($.css(el[0], prop)) || 0;
+    };
+    function width(el) {
+        return  el[0].offsetWidth + css(el, 'marginLeft') + css(el, 'marginRight');
+    };
+    function height(el) {
+        return el[0].offsetHeight + css(el, 'marginTop') + css(el, 'marginBottom');
+    };
+
+})(jQuery);
+
+/**
+ * jCarouselLite - jQuery plugin to navigate images/any content in a carousel style widget.
+ * @requires jQuery v1.2 or above
+ *
+ * http://gmarwaha.com/jquery/jcarousellite/
+ *
+ * Copyright (c) 2007 Ganeshji Marwaha (gmarwaha.com)
+ * Dual licensed under the MIT and GPL licenses:
+ * http://www.opensource.org/licenses/mit-license.php
+ * http://www.gnu.org/licenses/gpl.html
+ *
+ * Version: 1.0.1
+ * Note: Requires jquery 1.2 or above from version 1.0.1
+ */
+
+/**
+ * Creates a carousel-style navigation widget for images/any-content from a simple HTML markup.
+ *
+ * The HTML markup that is used to build the carousel can be as simple as...
+ *
+ *  <div class="carousel">
+ *      <ul>
+ *          <li><img src="image/1.jpg" alt="1"></li>
+ *          <li><img src="image/2.jpg" alt="2"></li>
+ *          <li><img src="image/3.jpg" alt="3"></li>
+ *      </ul>
+ *  </div>
+ *
+ * As you can see, this snippet is nothing but a simple div containing an unordered list of images.
+ * You don't need any special "class" attribute, or a special "css" file for this plugin.
+ * I am using a class attribute just for the sake of explanation here.
+ *
+ * To navigate the elements of the carousel, you need some kind of navigation buttons.
+ * For example, you will need a "previous" button to go backward, and a "next" button to go forward.
+ * This need not be part of the carousel "div" itself. It can be any element in your page.
+ * Lets assume that the following elements in your document can be used as next, and prev buttons...
+ *
+ * <button class="prev">&lt;&lt;</button>
+ * <button class="next">&gt;&gt;</button>
+ *
+ * Now, all you need to do is call the carousel component on the div element that represents it, and pass in the
+ * navigation buttons as options.
+ *
+ * $(".carousel").jCarouselLite({
+ *      btnNext: ".next",
+ *      btnPrev: ".prev"
+ * });
+ *
+ * That's it, you would have now converted your raw div, into a magnificient carousel.
+ *
+ * There are quite a few other options that you can use to customize it though.
+ * Each will be explained with an example below.
+ *
+ * @param an options object - You can specify all the options shown below as an options object param.
+ *
+ * @option btnPrev, btnNext : string - no defaults
+ * @example
+ * $(".carousel").jCarouselLite({
+ *      btnNext: ".next",
+ *      btnPrev: ".prev"
+ * });
+ * @desc Creates a basic carousel. Clicking "btnPrev" navigates backwards and "btnNext" navigates forward.
+ *
+ * @option btnGo - array - no defaults
+ * @example
+ * $(".carousel").jCarouselLite({
+ *      btnNext: ".next",
+ *      btnPrev: ".prev",
+ *      btnGo: [".0", ".1", ".2"]
+ * });
+ * @desc If you don't want next and previous buttons for navigation, instead you prefer custom navigation based on
+ * the item number within the carousel, you can use this option. Just supply an array of selectors for each element
+ * in the carousel. The index of the array represents the index of the element. What i mean is, if the
+ * first element in the array is ".0", it means that when the element represented by ".0" is clicked, the carousel
+ * will slide to the first element and so on and so forth. This feature is very powerful. For example, i made a tabbed
+ * interface out of it by making my navigation elements styled like tabs in css. As the carousel is capable of holding
+ * any content, not just images, you can have a very simple tabbed navigation in minutes without using any other plugin.
+ * The best part is that, the tab will "slide" based on the provided effect. :-)
+ *
+ * @option mouseWheel : boolean - default is false
+ * @example
+ * $(".carousel").jCarouselLite({
+ *      mouseWheel: true
+ * });
+ * @desc The carousel can also be navigated using the mouse wheel interface of a scroll mouse instead of using buttons.
+ * To get this feature working, you have to do 2 things. First, you have to include the mouse-wheel plugin from brandon.
+ * Second, you will have to set the option "mouseWheel" to true. That's it, now you will be able to navigate your carousel
+ * using the mouse wheel. Using buttons and mouseWheel or not mutually exclusive. You can still have buttons for navigation
+ * as well. They complement each other. To use both together, just supply the options required for both as shown below.
+ * @example
+ * $(".carousel").jCarouselLite({
+ *      btnNext: ".next",
+ *      btnPrev: ".prev",
+ *      mouseWheel: true
+ * });
+ *
+ * @option auto : number - default is null, meaning autoscroll is disabled by default
+ * @example
+ * $(".carousel").jCarouselLite({
+ *      auto: 800,
+ *      speed: 500
+ * });
+ * @desc You can make your carousel auto-navigate itself by specfying a millisecond value in this option.
+ * The value you specify is the amount of time between 2 slides. The default is null, and that disables auto scrolling.
+ * Specify this value and magically your carousel will start auto scrolling.
+ *
+ * @option speed : number - 200 is default
+ * @example
+ * $(".carousel").jCarouselLite({
+ *      btnNext: ".next",
+ *      btnPrev: ".prev",
+ *      speed: 800
+ * });
+ * @desc Specifying a speed will slow-down or speed-up the sliding speed of your carousel. Try it out with
+ * different speeds like 800, 600, 1500 etc. Providing 0, will remove the slide effect.
+ *
+ * @option easing : string - no easing effects by default.
+ * @example
+ * $(".carousel").jCarouselLite({
+ *      btnNext: ".next",
+ *      btnPrev: ".prev",
+ *      easing: "bounceout"
+ * });
+ * @desc You can specify any easing effect. Note: You need easing plugin for that. Once specified,
+ * the carousel will slide based on the provided easing effect.
+ *
+ * @option vertical : boolean - default is false
+ * @example
+ * $(".carousel").jCarouselLite({
+ *      btnNext: ".next",
+ *      btnPrev: ".prev",
+ *      vertical: true
+ * });
+ * @desc Determines the direction of the carousel. true, means the carousel will display vertically. The next and
+ * prev buttons will slide the items vertically as well. The default is false, which means that the carousel will
+ * display horizontally. The next and prev items will slide the items from left-right in this case.
+ *
+ * @option circular : boolean - default is true
+ * @example
+ * $(".carousel").jCarouselLite({
+ *      btnNext: ".next",
+ *      btnPrev: ".prev",
+ *      circular: false
+ * });
+ * @desc Setting it to true enables circular navigation. This means, if you click "next" after you reach the last
+ * element, you will automatically slide to the first element and vice versa. If you set circular to false, then
+ * if you click on the "next" button after you reach the last element, you will stay in the last element itself
+ * and similarly for "previous" button and first element.
+ *
+ * @option visible : number - default is 3
+ * @example
+ * $(".carousel").jCarouselLite({
+ *      btnNext: ".next",
+ *      btnPrev: ".prev",
+ *      visible: 4
+ * });
+ * @desc This specifies the number of items visible at all times within the carousel. The default is 3.
+ * You are even free to experiment with real numbers. Eg: "3.5" will have 3 items fully visible and the
+ * last item half visible. This gives you the effect of showing the user that there are more images to the right.
+ *
+ * @option start : number - default is 0
+ * @example
+ * $(".carousel").jCarouselLite({
+ *      btnNext: ".next",
+ *      btnPrev: ".prev",
+ *      start: 2
+ * });
+ * @desc You can specify from which item the carousel should start. Remember, the first item in the carousel
+ * has a start of 0, and so on.
+ *
+ * @option scrool : number - default is 1
+ * @example
+ * $(".carousel").jCarouselLite({
+ *      btnNext: ".next",
+ *      btnPrev: ".prev",
+ *      scroll: 2
+ * });
+ * @desc The number of items that should scroll/slide when you click the next/prev navigation buttons. By
+ * default, only one item is scrolled, but you may set it to any number. Eg: setting it to "2" will scroll
+ * 2 items when you click the next or previous buttons.
+ *
+ * @option beforeStart, afterEnd : function - callbacks
+ * @example
+ * $(".carousel").jCarouselLite({
+ *      btnNext: ".next",
+ *      btnPrev: ".prev",
+ *      beforeStart: function(a) {
+ *          alert("Before animation starts:" + a);
+ *      },
+ *      afterEnd: function(a) {
+ *          alert("After animation ends:" + a);
+ *      }
+ * });
+ * @desc If you wanted to do some logic in your page before the slide starts and after the slide ends, you can
+ * register these 2 callbacks. The functions will be passed an argument that represents an array of elements that
+ * are visible at the time of callback.
+ *
+ *
+ * @cat Plugins/Image Gallery
+ * @author Ganeshji Marwaha/ganeshread@gmail.com
+ */
+
+(function($) {                                          // Compliant with jquery.noConflict()
+    $.fn.jCarouselLite = function(o) {
+        o = $.extend({
+            btnPrev: null,
+            btnNext: null,
+            btnGo: null,
+            mouseWheel: false,
+            auto: null,
+
+            speed: 200,
+            easing: null,
+
+            vertical: false,
+            circular: true,
+            visible: 3,
+            start: 0,
+            scroll: 1,
+
+            beforeStart: null,
+            afterEnd: null
+        }, o || {});
+
+        return this.each(function() {                           // Returns the element collection. Chainable.
+
+            var running = false, animCss=o.vertical?"top":"left", sizeCss=o.vertical?"height":"width";
+            var div = $(this), ul = $("ul", div), tLi = $("li", ul), tl = tLi.size(), v = o.visible;
+
+            if(o.circular) {
+                ul.prepend(tLi.slice(tl-v-1+1).clone())
+                    .append(tLi.slice(0,v).clone());
+                o.start += v;
+            }
+
+            var li = $("li", ul), itemLength = li.size(), curr = o.start;
+            div.css("visibility", "visible");
+
+            li.css({overflow: "hidden", float: o.vertical ? "none" : "left"});
+            ul.css({margin: "0", padding: "0", position: "relative", "list-style-type": "none", "z-index": "1"});
+            div.css({overflow: "hidden", position: "relative", "z-index": "2", left: "0px"});
+
+            var liSize = o.vertical ? height(li) : width(li);   // Full li size(incl margin)-Used for animation
+            var ulSize = liSize * itemLength;                   // size of full ul(total length, not just for the visible items)
+            var divSize = liSize * v;                           // size of entire div(total length for just the visible items)
+
+            li.css({width: li.width(), height: li.height()});
+            ul.css(sizeCss, ulSize+"px").css(animCss, -(curr*liSize));
+
+            div.css(sizeCss, divSize+"px");                     // Width of the DIV. length of visible images
+
+            if(o.btnPrev)
+                $(o.btnPrev).click(function() {
+                    return go(curr-o.scroll);
+                });
+
+            if(o.btnNext)
+                $(o.btnNext).click(function() {
+                    return go(curr+o.scroll);
+                });
+
+            if(o.btnGo)
+                $.each(o.btnGo, function(i, val) {
+                    $(val).click(function() {
+                        return go(o.circular ? o.visible+i : i);
+                    });
+                });
+
+            if(o.mouseWheel && div.mousewheel)
+                div.mousewheel(function(e, d) {
+                    return d>0 ? go(curr-o.scroll) : go(curr+o.scroll);
+                });
+
+            if(o.auto)
+                setInterval(function() {
+                    go(curr+o.scroll);
+                }, o.auto+o.speed);
+
+            function vis() {
+                return li.slice(curr).slice(0,v);
+            };
+
+            function go(to) {
+                if(!running) {
+
+                    if(o.beforeStart)
+                        o.beforeStart.call(this, vis());
+
+                    if(o.circular) {            // If circular we are in first or last, then goto the other end
+                        if(to<=o.start-v-1) {           // If first, then goto last
+                            ul.css(animCss, -((itemLength-(v*2))*liSize)+"px");
+                            // If "scroll" > 1, then the "to" might not be equal to the condition; it can be lesser depending on the number of elements.
+                            curr = to==o.start-v-1 ? itemLength-(v*2)-1 : itemLength-(v*2)-o.scroll;
+                        } else if(to>=itemLength-v+1) { // If last, then goto first
+                            ul.css(animCss, -( (v) * liSize ) + "px" );
+                            // If "scroll" > 1, then the "to" might not be equal to the condition; it can be greater depending on the number of elements.
+                            curr = to==itemLength-v+1 ? v+1 : v+o.scroll;
+                        } else curr = to;
+                    } else {                    // If non-circular and to points to first or last, we just return.
+                        if(to<0 || to>itemLength-v) return;
+                        else curr = to;
+                    }                           // If neither overrides it, the curr will still be "to" and we can proceed.
+
+                    running = true;
+
+                    ul.animate(
+                            animCss == "left" ? { left: -(curr*liSize) } : { top: -(curr*liSize) } , o.speed, o.easing,
+                        function() {
+                            if(o.afterEnd)
+                                o.afterEnd.call(this, vis());
+                            running = false;
+                        }
+                    );
+                    // Disable buttons when the carousel reaches the last/first, and enable when not
+                    if(!o.circular) {
+                        $(o.btnPrev + "," + o.btnNext).removeClass("disabled");
+                        $( (curr-o.scroll<0 && o.btnPrev)
+                                ||
+                                (curr+o.scroll > itemLength-v && o.btnNext)
+                                ||
+                                []
+                        ).addClass("disabled");
+                    }
+
+                }
+                return false;
+            };
+        });
+    };
+
+    function css(el, prop) {
+        return parseInt($.css(el[0], prop)) || 0;
+    };
+    function width(el) {
+        return  el[0].offsetWidth + css(el, 'marginLeft') + css(el, 'marginRight');
+    };
+    function height(el) {
+        return el[0].offsetHeight + css(el, 'marginTop') + css(el, 'marginBottom');
+    };
+
+})(jQuery);

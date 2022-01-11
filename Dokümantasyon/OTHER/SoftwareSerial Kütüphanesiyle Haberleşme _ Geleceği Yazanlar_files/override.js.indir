@@ -1,0 +1,337 @@
+/*
+ * Override some javascripts
+ */
+
+jQuery(function($) {
+
+  var process = '<div class="process"></div>';
+
+  var items   = [
+                  'body.page-node-add-article .form-submit',
+                  'body.node-type-article .form-submit',
+                  'body.page-node-add-question .form-submit',
+                  'form.node-answer-form .form-submit',
+                  'body.node-type-question .form-submit',
+                  'form#gelecegiyazanlar-v2-contact-form .form-submit',
+                  'body.node-type-etkinlik .form-submit',
+                  'body.page-blog .form-submit',
+                ];
+  var select  = items.join(', ');
+
+  $(select).on('click',function(){
+     $('body').append(process);
+  });
+
+  /*
+   * Aşağıdaki fonksiyoni, etkinlik sayfasında şayet etkinlik için geri sayım tamamen sıfırlandıysa
+   * çalışacak.
+   */
+  if (parseInt($(".countdown-container .day").html()) != 0 ||
+    parseInt($(".countdown-container .hour").html()) != 0 ||
+    parseInt($(".countdown-container .minute").html()) != 0 ||
+    parseInt($(".countdown-container .second").html()) != 0) {
+    $(".countdown-container").show();
+  }
+
+
+});
+
+jQuery(document).ajaxComplete(function(event, xhr, settings) {
+  var text = xhr['responseText'];
+  if (text.length > 0) { //return değer kontrolü yapılıyor.
+    try {
+      text = JSON.parse(text);
+      if ((text['node_type'] == 'etkinlik' || text['node_type'] == 'article' || text['node_type']=='gelecegiyazanlar_tv') && text['form'] == 'comment_form') {
+        jQuery(".form-submit").hide();
+        window.location = text['redirect']; //sayfa yönlendiriliyor.
+        if (location.hash) location.reload(); //url'de hash varsa reload metotu çalıştırılıyor.
+      }
+      //Daha önce flagleme yapmış kullanıcıya uyarı bastırılması
+        if(text.error==true)
+        {
+          if(text.type)
+          {
+            if(text.type==1) {
+              alert("Bu videoyu daha önce beğenmiştiniz!");
+            }
+            else if(text.type==2)
+              alert("Lütfen giriş yapıp, tekrar deneyiniz.");
+            else if(text.type==4)
+              alert("4");
+          }
+        }
+    } catch (e) {
+      true;
+    }
+  }
+});
+
+/*
+Sayfa yüklendiğinde soru-cevap altındaki dosya linklerine target attribute'unu ekleyen fonk.
+*/
+jQuery(window).load(function() {
+  jQuery('.questions span.file a').attr({
+    target: "_blank"
+  });
+
+});
+
+
+jQuery(document).ready(function($) {
+
+  /*
+  Kullanıcı kayıt formunun ikinci kısmındaki kullanılan js'ler burada bulunur
+  */
+  if ($('#edit-field-education-und').val() == 'Lise' ||
+    $('#edit-field-education-und').val() == 'Ortaokul') {
+    $('#edit-field-universite li').hide();
+  }
+  $('#edit-field-education-und').change(function() {
+    if ($('#edit-field-education-und').val() == 'Lise' ||
+      $('#edit-field-education-und').val() == 'Ortaokul' ||
+      $('#edit-field-education-und').val() == '_none') {
+      $('#edit-field-universite li').hide();
+      $('#edit-field-universite-und').val('_none');
+      $('#edit-field-universite-und').removeClass('required');
+    } else {
+      $('#edit-field-universite li').show();
+      $('#edit-field-universite li label').html("Üniversite <span class=" +
+        "\"form-required\" title=\"Bu alan zorunludur.\">*</span>");
+      $('#edit-field-universite-und').addClass('required');
+    }
+  });
+
+  $('#profile-edit').submit(function() {
+    if (($('#edit-field-education-und').val() != 'Lise' && $('#edit-field-education-und').val() != 'Ortaokul' && $('#edit-field-education-und').val() != '_none') &&
+      (!$('#edit-field-universite-und').val() ||
+        $('#edit-field-universite-und').val() == '_none')) {
+      if ($('#university-null-error').length == 0) {
+        $('h1.content-title').after("<div class=\"messages error\" id=" +
+          "\"university-null-error\">Üniversite kısmı boş bırakılamaz. " +
+          "Eğer üniversiteniz listede yoksa lütfen Diğer seçeneğini " +
+          "seçiniz.</div>");
+      }
+      window.scrollTo(0, 0);
+      $(".process").hide();
+      return false;
+    }
+  });
+
+  $('#edit-field-usergrid-und').change(function() {
+    if (this.checked) {
+      //$("#userGridEula").trigger('click');
+      $.colorbox({
+        escKey: false,
+        overlayClose: false,
+        href: "/eula/1169/",
+        onLoad: function() {
+          $("#cboxClose").hide();
+        },
+        onComplete: function() {
+          $("#buttonCancel").click(function() {
+            $("#edit-field-usergrid-und").prop('checked', false);
+            $.colorbox.close();
+          });
+
+          $("#buttonAccept").click(function() {
+            $.colorbox.close();
+          });
+        }
+      });
+    }
+  });
+  if (($(".error").length > 0) && ($(".error").html().indexOf("Zorunlu") != -1)) {
+    $("input#edit-roles-change-11").prop('checked', true);
+    jQuery(".main fieldset, .main div.form-item").each(function() {
+      if ($("span.form-required", this).length < 1) {
+        $("*", this).hide();
+        $(this).hide();
+      }
+    });
+    $(".main li").each(function() {
+      if ($("span.form-required", this).length > 0 || $("input#edit-field-cep-telefonum-und-0-value", this).length > 0 || $("div#edit-field-dogum-tarihi-und-0-value", this).length > 0) $("*", this).show("slow");
+      else $(this).hide();
+    });
+  }
+  $('#field-dogum-tarihi-add-more-wrapper .form-item').css('display', 'inline-table');
+  $('#field-dogum-tarihi-add-more-wrapper .form-item .date-year option:nth-child(1)').text('Yıl');
+  $('#edit-field-dogum-tarihi-und-0-value-month option:nth-child(1)').text('Ay');
+  $('#edit-field-dogum-tarihi-und-0-value-day option:nth-child(1)').text('Gün');
+
+  /*
+  Giriş formunda kullanıcı adı değil de email adresi girilmeye çalışıldığı takdirde
+  uyarı verilmesi için kullanılan js
+  */
+  $('form#fml #username, #user-login .email input').on('input', function() {
+    if ($(this).val().indexOf('@') != -1) {
+      alert("E-mail adresiniz yerine kullanıcı adınızı kullanarak giriş yapın.");
+    }
+  });
+
+    $('body.node-type-gelecegiyazanlar-tv.page-videolar div.like-container a:not(.answer)').click(function (e) {
+        e.preventDefault(); //click eventi iptal edilir.
+
+        if($(this).parent().find('.mini-loading').length > 0) {
+            return false;
+        }
+
+        var img     = '<div class="mini-loading"></div>';
+        var a_list  = $(this).parent().find('a:not(".answer")');
+        var a_val   = new Array();
+
+        $(a_list).each(function(i){
+           a_val[i] = $(this).html();
+            $(this).html(img);
+        });
+
+        var dom = $(this);
+        var dom_type = $(dom).data('type');
+        var selector = $(this).parent();
+        $.getJSON($(this).attr('href'), function (data) {
+            if (data.error == true) {
+                $(a_list).each(function(i, e){
+                    $(this).html(a_val[i]);
+                });
+            }
+            else if (data.like == true) {
+                $(dom).html(data.flag_count);
+                $(selector).children('a:not(".answer")').each(function (index) {
+
+
+
+
+                    if ($(this).data('type') != $(dom).data('type')) {
+                        $(this).html(data.opposite_flag);
+                    }
+
+                    $(this).removeClass("flagged");
+                    $(dom).addClass("flagged");
+
+                    if($(this)[0].className=='like tooltip flagged' || $(this)[0].className=='like tooltip' )
+                  {
+
+
+                      if(data.selected==2)
+                      {
+                        $(this).siblings().append("<span>Bunu beğenmemekten vazgeçtim</span>");
+                        $(this).append("<span>Bunu beğendim</span>");
+                      }
+
+                      else if(data.selected==4)
+                      {
+                        $(this).append("<span>Bunu beğendim</span>");
+                        $(this).siblings().append("<span>Bunu beğenmedim</span>");
+                      }
+                  }
+                   if($(this)[0].className=='unlike tooltip flagged' || $(this)[0].className=='unlike tooltip' )
+                  {
+                    if(data.selected==1)
+                      {
+                        $(this).siblings().append("<span>Beğenmekten vazgeçtim</span>");
+                        $(this).append("<span>Bunu beğenmedim</span>");
+                      }
+                      else if(data.selected==3)
+                      {
+                        $(this).siblings().append("<span>Bunu beğendim</span>");
+                        $(this).append("<span>Bunu beğenmedim</span>");
+                      }
+                  }
+                });
+            }
+        });
+
+
+    });
+});
+
+/**
+ * @issue #12547 kapsamında view'da yer alan kodlar js dosyasına taşındı.
+ */
+jQuery(function ($) {
+    $('a.reply-to-comment').click(function (event) {
+        event.preventDefault();
+        $("div#comment-form").html(' ');
+        $("div#comment-form").load($(this).attr("href") + " .modal-window form");
+        var anchor = $("div#comment-form");
+        $('html, body').animate({
+            scrollTop: anchor.offset().top,
+            scrollLeft: anchor.offset().left
+        }, 1000);
+    });
+    $('a.answer').click(function (event) {
+        event.preventDefault();
+        $('.video-comments').find('div.reply_comment_block').remove();
+        $(this).parent('div').parent().find('div.comment').first().append('<div class="reply_comment_block"></div>');
+        var div = $(this).parent('div').parent().find('div.reply_comment_block');
+        div.hide();
+        div.html(' ');
+        div.load($(this).attr("href") + " .modal-window form", function () {
+            $(this).show('slow');
+            $('html, body').animate({
+                scrollTop: $(this).offset().top,
+                scrollLeft: $(this).offset().left
+            }, 1000);
+        });
+    });
+
+    $('body.node-type-gelecegiyazanlar-tv div.reply_comment_block .form-submit').on('click', function (e) {
+        if ($(this).closest('form').find('textarea').val() == '') {
+            e.preventDefault();
+            if ($(this).closest('form').parent().find('div.messages').length == 0)
+                $('<div class="messages error"><p>Yorum alanı zorunludur.</p></div>').insertBefore($(this).closest('form'));
+
+        }
+        else {
+            var process = '<div class="process"></div>';
+            $('body').append(process);
+        }
+    });
+
+    /**
+     * @issue #12837 yorum yap butonuna tıklanınca textarea temizlensin.
+     */
+    $('div.qa-comments .add-comment').click(function () {
+        $(this).parent().find('textarea.form-textarea').val('');
+    });
+
+    $.fn.processComment = function () {
+        var loading = '<div class="process"></div>';
+        $('body').append(loading);
+        location.reload();
+    }
+
+    $.fn.feedbackComment = function() {
+        $(this).html('<p><strong>Teşekkür Ederiz.</strong></p>');
+    }
+
+    $.fn.changeRelationPage = function() {
+    	var proccess = '<div class="process"></div>';
+    	$('body').append(proccess);
+		location.reload()
+    }
+});
+
+
+  jQuery(document).ready(function($) {
+      if ( navigator.userAgent.match(/msie [1-8]/i) != null ) {
+	$('body').prepend('<div class="error-container headerMessages"><div class="content-holder group"><p>Geleceği Yazanlar portalında daha iyi bir kullanıcı deneyimi için web tarayıcınızı güncelleştirmenizi öneriyoruz</p></div></div>');
+
+        }
+//        if ( ($.browser.mozilla) && (parseInt($.browser.version) <= 33.0) ){
+//
+//           $('body').prepend('<div class="error-container headerMessages"><div class="content-holder group"><p>You are using an old version of Internet Explorer which is not supported.  Please upgrade your browser in order to view this website.</p></div></div>');
+//        }
+  });
+
+
+  jQuery(function($) {
+       var edit = false;
+       var editable = false;
+      $('div.qa-comments .add-comment-to-qa .form-textarea, div.feedback_comment .form-textarea').on("focus", function () {
+            edit = true;
+        });
+
+         $('div.qa-comments .add-comment-to-qa .form-textarea, div.feedback_comment .form-textarea').on("keypress", function () {
+            editable = $('.form-textarea').val() !== '';
+        });
+});

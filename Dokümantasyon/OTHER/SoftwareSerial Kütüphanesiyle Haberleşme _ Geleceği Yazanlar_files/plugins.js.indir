@@ -1,0 +1,1491 @@
+/**
+ * @author Bilal Cinarli
+ * @auhtor Sevil Yilmaz
+ */
+
+/**
+ * Constructor method
+ */
+Namespace.Register('TGY');
+
+(function ($) {
+    $.fn.countdown = function (options) {
+        return this.each(function () {
+            var $el = $(this);
+            var remaining = {
+                secondText: $el.find('.second'),
+                seconds: $el.find('.second').text(),
+                minutes: $el.find('.minute').text(),
+                hours: $el.find('.hour').text(),
+                days: $el.find('.day').text()
+            };
+
+            time = setInterval(function () {
+                countTime(remaining);
+            }, 1000);
+
+            function countTime(remaining) {
+                if (remaining) {
+                    if (remaining.seconds == 0 && remaining.minutes == 0 && remaining.hours == 0 && remaining.days == 0)
+                        remaining = false;
+                }
+
+                if (!remaining) {
+                    return true;
+                }
+
+                var second = remaining.seconds - 1;
+                var minute = remaining.minutes * 1;
+                var hour = remaining.hours * 1;
+                var day = remaining.days * 1;
+
+                if (second < 0) {
+                    second = 59;
+                    minute = minute - 1;
+                }
+
+                if (minute < 0) {
+                    minute = 59;
+                    hour = hour - 1;
+                }
+
+                if (hour < 0) {
+                    hour = 23;
+                    day = day - 1;
+                }
+
+                secondText = second;
+                minuteText = minute;
+                hourText = hour;
+                dayText = day;
+
+                if (second < 10) {
+                    secondText = '0' + second;
+                }
+                if (minute < 10) {
+                    minuteText = '0' + minute;
+                }
+                if (hour < 10) {
+                    hourText = '0' + hour;
+                }
+                if (day < 10) {
+                    dayText = '0' + day;
+                }
+
+                remaining.seconds = second;
+                remaining.minutes = minute;
+                remaining.hours = hour;
+                remaining.day = day;
+
+                $el.find('.second').text(secondText);
+                $el.find('.minute').text(minuteText);
+                $el.find('.hour').text(hourText);
+                $el.find('.day').text(dayText);
+            }
+        });
+    };
+})(jQuery);
+
+/**
+ * Custom combobox
+ */
+(function ($) {
+    var z = 999;
+    var i = 1;
+
+    $.fn.unitSelect = function (options) {
+        var opts = $.extend({}, $.fn.unitSelect.defaults, options);
+
+        return this.each(function () {
+            var $select = $(this);
+            var replaced = opts.replaced;
+            var wrapper = opts.wrapper;
+            var option = opts.option;
+            var current = opts.current;
+            var arrow = opts.arrow;
+            var selected = opts.selected;
+            var drop = opts.drop;
+            var optionList = '';
+            var currentText = '';
+            var wrap = $("." + wrapper);
+            var wrapID = 'unit-select-' + i;
+
+            // Plugin'in tekrar cagirilmasi durumunda iki tane uretilmesini engeller
+            if ($select.hasClass(replaced)) {
+                return;
+            }
+
+            $select.parent().css('z-index', z);
+            $select.addClass(replaced).before('<div class="' + wrapper + ' group" />');
+
+            $select.prev().attr('id', wrapID);
+
+            $select.find('option').each(function () {
+                var $o = $(this);
+
+                optionList += '<li><a class="' + option;
+                if ($o.is(':selected')) {
+                    optionList += ' ' + selected;
+                    currentText = $o.text();
+                }
+
+                optionList += '" data-index="' + $o.index() + '" data-value="' + $o.val() + '">' + $o.text() + '</a></li>';
+            });
+
+            $("#" + wrapID).append('<span class="' + current + '">' + currentText + '<span class="' + arrow + '"></span></span><ul class="' + drop + ' group">' + optionList + '</ul>');
+
+            // Custom scroll
+            $select.prev().children('.' +drop).jScrollPane({autoReinitialise: true});
+
+            $("#" + wrapID).on('click.us', '.' + current, function () {
+                var dropList = $(this).next('.' + drop);
+                dropList.toggle();
+                if (dropList.height() > 200) {
+                    dropList.css('overflow-y', 'scroll');
+                }
+                $(this).toggleClass('unit-select-visible');
+
+                $("." + drop).not($(this).next('.' + drop)).hide();
+                $('.unit-select-visible').not($(this)).removeClass('unit-select-visible');
+            });
+
+            $("#" + wrapID).on('click.us', '.' + option, function () {
+                var starts = 0;
+                var $this = $(this);
+                var dropHolder = $this.parents('.' + drop);
+                var currentText = $this.text();
+                var selectedOption = $this.attr('data-value');
+
+                dropHolder.find('.' + option).removeClass(selected);
+                $this.addClass(selected);
+
+                dropHolder.siblings('span.' + current).html(currentText + '<span class="' + arrow + '"></span>').removeClass('unit-select-visible');
+                $select.val(selectedOption);
+                $select.trigger('change');
+                dropHolder.hide();
+            });
+
+            $select.focus(function () {
+                var $this = $(this);
+                var dropList = $this.prev().children('.' +drop);
+                var currentHolder = $this.prev().children('.' +current);
+                dropList.show();
+                if (dropList.height() > 200) {
+                    $(this).css('overflow-y', 'scroll');
+                }
+
+                $this.change(function () {
+                    var value = $(this).val();
+                    var currentText = $(this).find(':selected').text();
+
+                    currentHolder.text(currentText);
+                    dropList.find('a').removeClass(selected).filter('a[data-value="' + value + '"]').addClass(selected);
+
+                    $(this).keyup(function (event) {
+                        if (event.which == 13) {
+                            dropList.hide();
+                        }
+                    });
+                });
+            });
+
+            $select.blur(function () {
+                var $this = $(this);
+                var dropList = $this.prev().children('.' +drop);
+                dropList.hide();
+            });
+
+            $('body').on('click.us', function (e) {
+                if (!$(e.target).is('.' + wrapper + ', .' + wrapper + ' *')) {
+                    $("." + drop).hide();
+                    $("." + current).removeClass('unit-select-visible');
+                }
+            });
+
+            z--;
+            i++;
+        });
+    };
+
+    $.fn.unitSelect.defaults = {
+        replaced: 'unit-select-replaced',
+        wrapper: 'unit-select',
+        option: 'unit-select-option',
+        current: 'unit-select-current',
+        arrow: 'unit-select-arrow',
+        selected: 'unit-select-selected',
+        drop: 'unit-select-drop'
+    };
+})(jQuery);
+
+(function($){
+    $.fn.unitCloner = function(options){
+        var i = 1;
+        var opts = $.extend({}, $.fn.unitCloner.defaults, options);
+        return this.each(function(){
+            var $el = $(this);
+
+            var source = $("#" + $el.attr('data-source'));
+            var target = $("#" + $el.attr('data-target'));
+            var complete = $el.attr('data-complete');
+
+            $el.click(function(e){
+                e.preventDefault();
+
+                var src = source.clone(true);
+
+                if(source.is('script')){
+                    var string = source.html();
+                    var temp = $("<div />").html(string).contents();
+                    src = temp;
+                }
+
+                var $clone = src.attr('id', 'unit-clone-' + i).addClass('cloned').append('<a class="remove-row">Kaldır</a>');
+                $clone.find('textarea, select, input').val('');
+                target.append($clone);
+
+                if(complete != undefined){
+                    var onComplete = complete.split(':');
+                    $("#unit-clone-" + i).find(onComplete[0])[onComplete[1]]();
+                }
+
+                i++;
+            });
+        });
+    },
+
+    $.fn.unitCloner.defaults = {}
+
+    $(document).on('click', '.remove-row', function(){
+        var parent = $(this).parents('.cloned').remove();
+        return false;
+    });
+})(jQuery);
+
+/**
+ * Turkcell UXITD
+ * jQuery based tab switcher
+ * @author Kursad Yildirmak
+ */
+(function($){
+    var ux, // local shorthand
+
+        defaults = {
+            button: ".tab-view-button",
+            content: ".tab-view-content",
+            current: 'current',
+
+            onChange: false
+        };
+
+    // constructor method
+    var TabView = function(el, options, modal){
+        var opts = $.extend({}, defaults, options, $(el).data()),
+
+        // cached variables
+            $tabview = $(el),
+            $buttons = $tabview.find(opts.button),
+            $content = $tabview.find(opts.content),
+            $modal = modal;
+
+        $(el).on('click' , opts.button , function(e){
+            if(typeof $(this).attr('href') !== typeof undefined && $(this).attr('href') !== false){
+                e.preventDefault();
+            }
+
+            e.stopPropagation();
+            var currentIndex = $(this).index(),
+                onChange = $(this).data('onChange');
+
+            if (typeof $(this).attr('role') != 'undefined') {
+                var role = $(this).attr('role'),
+                    classes = $tabview.attr('class').split(" ");
+                $tabview.removeClass(classes.pop());
+                $tabview.addClass(role);
+            }
+
+            $buttons.removeClass('current');
+            $content.removeClass('current');
+            $content.eq(currentIndex).addClass('current');
+            $(this).addClass('current');
+            if($modal) {
+                $.uxmodal.resize();
+            }
+            callback(onChange);
+        });
+    };
+
+    // global callback
+    var callback = function(fn){
+        // if callback string is function call it directly
+        if(typeof fn === 'function'){
+            call(fn);
+        }
+
+        // if callback defined via data-attribute, call it via new Function
+        else {
+            if(fn !== false){
+                var func = new Function('return ' + fn);
+                func();
+            }
+        }
+    };
+
+    // jquery bindings
+    ux = $.fn.tabview = $.uxtabview = function(options){
+        return this.each(function(){
+            var $el = $(this),
+                tabview,
+                modal = false;
+
+            if(!$el.hasClass('.tab-view')){
+                $el.addClass('tab-view');
+            }
+
+            //uxitd-modal plugin resize trigger if tab sizes different each other
+            if($el.closest('#colorbox').hasClass('uxitd-modal')){
+                modal = true;
+            }
+
+            if($el.hasClass('uxitd-tabview-ready')){
+                return;
+            }
+
+            $el.addClass('uxitd-tabview-ready');
+            tabview = new TabView(this, options , modal);
+        });
+    };
+
+    // Version
+    ux.version = "0.1";
+
+    // settings
+    ux.settings = defaults;
+
+})(jQuery);
+
+/**
+ * UX Rocket
+ * jQuery based tooltip and popover
+ * @author Bilal Cinarli
+ * @author Rames Aliyev
+ */
+
+;(function($) {
+    var ux, // local shorthand
+
+        defaults = {
+            placement: 'top', // where the tooltip appear relative to element
+            position : 'center', // center|start|end centers the container or place it on the corner
+            template : '' +
+                       '<div {id} class="tooltip-pop {class}">' +
+                       '    <div class="tooltip-content">{content}</div>' +
+                       '    <div class="tooltip-arrow"></div>' +
+                       '</div>',
+            cssClass   : '',
+            id         : '',
+            showAnimate: false,
+            type       : 'tooltip', // tooltip | popover,
+
+            onReady  : false,
+            onOpen   : false,
+            onUpdate : false,
+            onClose  : false,
+            onRemove : false,
+            onDestroy: false
+        },
+        lastActiveTooltip = null,
+        events = {
+            click     : 'click.uxTooltip',
+            mouseenter: 'mouseenter.uxTooltip',
+            mouseleave: 'mouseleave.uxTooltip'
+        };
+
+    // constructor method
+    var Tooltip = function(el, options) {
+
+        var $el = $(el),
+            opts = $.extend({}, defaults, options, $el.data()),
+            dims = {},
+            title = $(el).attr('title');
+
+        //cached variables
+        var instance_opts = {
+            el     : $el,
+            title  : title,
+            timeout: null,
+            tmp    : null,
+            view   : false,
+            dims   : dims,
+            ttip   : null,
+            opts   : opts
+        };
+
+        if(typeof opts.content === 'undefined' || opts.content === null) {
+            if(typeof title !== 'undefined' && title !== '') {
+                opts.content = title;
+            }
+            else {
+                return;
+            }
+        }
+
+        $el.data('uxTooltip', instance_opts);
+        instance_opts.el.data("tooltip", true);
+
+        $(window).load(function() {
+            getPosition($el, dims);
+        });
+
+        callback(opts.onReady);
+
+        bindUIActions($el);
+    };
+
+    var bindUIActions = function($el) {
+        var _instance = $el.data('uxTooltip'),
+            opts = _instance.opts,
+            $ttip = _instance.$ttip,
+            showEvent = (opts.type === "popover" ? events.click : events.mouseenter + ' ' + events.mouseleave);
+
+        $el.on(showEvent, function(e) {
+            var active = $el.data("tooltip-active");
+
+            if(!active || !_instance.view) {
+                showTooltip(_instance);
+            } else {
+                hideTooltip(_instance);
+            }
+        });
+
+
+        $(document).on('click', function(e) {
+            var $target = $(e.target);
+
+            if($target.is('.tooltip-pop, .tooltip-pop *')) {
+                return;
+            }
+
+            $ttip = _instance.$ttip = $(".tooltip-pop");
+
+            var hasTooltip = $target.data("tooltip");
+
+            if(hasTooltip) {
+                lastActiveTooltip.el.data("tooltip-active", false);
+            } else if(typeof $ttip !== 'undefined' && $ttip.length > 0) {
+                if($ttip.hasClass("tooltip-popover")) {
+                    return;
+                }
+
+                hideTooltip(_instance);
+            }
+        });
+    };
+
+    var showTooltip = function(options) {
+        var opts = options.opts,
+            $el = options.el,
+            $ttip = options.ttip,
+            dims = options.dims;
+
+        lastActiveTooltip = options;
+        options.view = true;
+        options.el.data("tooltip-active", true);
+        options.timeout = setTimeout(function() {
+            options.tmp = createTooltip(options);
+            options.ttip = $ttip = $(".tooltip-pop");
+
+            getPosition($el, dims);
+
+            positionTooltip($ttip, dims, opts);
+
+            callback(opts.onOpen);
+
+            options.view = true;
+        }, 200);
+    };
+
+    var hideTooltip = function(options) {
+        var opts = options.opts,
+            view = options.view,
+            $ttip = options.ttip;
+
+        if(view === true && $ttip) {
+            $ttip.remove();
+            callback(opts.onRemove);
+        }
+
+        clearTimeout(options.timeout);
+        options.tmp = null;
+        options.view = false;
+        options.el.data("tooltip-active", false);
+    };
+
+    var closeButton = function(options) {
+        var opts = options.opts,
+            $ttip = options.ttip;
+
+        if(opts.type === 'tooltip') {
+            return;
+        }
+
+        $ttip.append('<a class="tooltip-close">X</a>');
+
+        $ttip.on('click', '.tooltip-close', function() {
+            $ttip.remove();
+            callback(opts.onClose);
+            callback(opts.onRemove);
+            options.view = false;
+        });
+    };
+
+    var createTooltip = function(options) {
+        var opts = options.opts,
+            tooltip = '',
+            content = '',
+            template = opts.template,
+            temp_content = opts.content,
+            obj_pattern = /^(\.|#)(-?[_a-zA-Z]+[_a-zA-Z0-9-]*)/,
+            url_pattern = /^(http|https|\/|\.\/|\.\.\/)/,
+            function_pattern = /^([^\d\s]([a-zA-Z0-9_]+))\((.*)?\)/g,
+            search_for = ['{id}', '{class}', '{content}'],
+            replace = $.extend({id: opts.id, cssClass: opts.cssClass, content: opts.content}, $(opts.el).data()),
+            replace_with,
+            popoverClass = '';
+
+        // After create callback.
+        var afterCreate = function() {
+            closeButton(options);
+        };
+
+        // css id
+        if(typeof opts.id !== 'undefined' && opts.id !== null) {
+            replace.id = opts.id;
+        }
+
+        // css class
+        if(typeof opts.cssClass !== 'undefined' && opts.cssClass !== null) {
+            replace.cssClass = opts.cssClass;
+        }
+
+        // check if content is an element in a page
+        if(obj_pattern.test(temp_content)) {
+            if($(temp_content).length === 1) {
+                replace.content = $(temp_content).html();
+            }
+        }
+
+        else if(url_pattern.test(temp_content)) {
+            replace.cssClass += ' preloading tooltip-ajax-content';
+            replace.content = "";
+
+            afterCreate = function(response) {
+            };
+
+            $.ajax({
+                url    : temp_content,
+                async  : true,
+                success: function(response) {
+                    afterPreloading(response, options);
+                }
+            });
+        }
+
+        else if(function_pattern.test(temp_content)) {
+            replace.cssClass += ' preloading';
+            replace.content = "";
+
+            var fn = temp_content.replace(function_pattern, "$1|$3").split("|");
+
+            afterCreate = function() {
+                content = temp_content;
+
+                if(typeof(window[fn[0]]) != 'undefined') {
+                    content = window[fn[0]](fn[1]);
+                }
+
+                afterPreloading(content, options);
+            };
+        }
+
+        if(opts.type === 'popover') {
+            popoverClass = ' tooltip-popover';
+        }
+
+        replace.cssClass += ' position-' + opts.position + ' placement-' + opts.placement + popoverClass;
+
+        replace_with = [replace.id, replace.cssClass, replace.content];
+        tooltip = template.replaceArray(search_for, replace_with);
+
+        $(".tooltip-pop").remove();
+        $('body').append(tooltip);
+
+        // Asyc call.
+        setTimeout(function() {
+            if(typeof afterCreate === "function") {
+                afterCreate();
+            }
+        }, 0);
+
+        return tooltip;
+    };
+
+    var afterPreloading = function(content, options) {
+        var el = options.el,
+            dims = options.dims,
+            opts = options.opts;
+
+        var tooltip = options.ttip = $(".tooltip-pop");
+        tooltip.removeClass("preloading");
+        tooltip.find(".tooltip-content").html(content);
+
+        closeButton(options);
+        getPosition(el, dims);
+        positionTooltip(tooltip, dims, opts);
+    };
+
+    var getPosition = function($el, dims) {
+        dims.offset = $el.offset();
+        dims.width = $el.outerWidth();
+        dims.height = $el.outerHeight();
+    };
+
+    var positionTooltip = function($tooltip, dims, options) {
+
+        // Correct width.
+        $tooltip.offset({top: -9999, left: -9999});
+
+        var $w = $tooltip.outerWidth(),
+            $h = $tooltip.outerHeight(),
+            top = dims.offset.top - ($h - dims.height) / 2, // default center
+            left = dims.offset.left - ($w - dims.width) / 2, // default center
+            arrow = $tooltip.find('.tooltip-arrow').height();
+
+        // get the top position
+        switch(options.placement) {
+            case 'top':
+                // Get proper margin bottom value.
+                var marginBottom = $tooltip.css('marginBottom');
+                marginBottom = marginBottom === "auto" ? 0 : marginBottom.replace("px", "");
+
+                top = dims.offset.top - $h - marginBottom;
+                if(options.position === 'end') {
+                    left = dims.offset.left + dims.width - $w;
+                }
+                else if(options.position === 'start') {
+                    left = dims.offset.left;
+                }
+                break;
+            case 'bottom':
+                top = dims.offset.top + dims.height + (arrow * 1.5);
+                if(options.position === 'end') {
+                    left = dims.offset.left + dims.width - $w;
+                }
+                else if(options.position === 'start') {
+                    left = dims.offset.left;
+                }
+                break;
+            case 'right':
+                left = dims.offset.left + dims.width;
+                if(options.position === 'end') {
+                    top = dims.offset.top - $h;
+                }
+                else if(options.position === 'start') {
+                    top = dims.offset.top;
+                }
+                break;
+            case 'left':
+                left = dims.offset.left - $w - (dims.width / 2);
+                if(options.position === 'end') {
+                    top = dims.offset.top + dims.height;
+                }
+                else if(options.position === 'start') {
+                    top = dims.offset.top;
+                }
+                break;
+            case 'center':
+                if(options.position === 'end') {
+                    top = dims.offset.top + (dims.height / 2);
+                    left = dims.offset.left - $w;
+                }
+                break;
+        }
+
+        // Round values.
+        top = Math.round(top);
+        left = Math.round(left);
+
+        $tooltip.offset({top: top, left: left});
+    };
+
+    // global callback
+    var callback = function(fn) {
+        // if callback string is function call it directly
+        if(typeof fn === 'function') {
+            fn.apply(this);
+        }
+
+        // if callback defined via data-attribute, call it via new Function
+        else {
+            if(fn !== false) {
+                var func = new Function('return ' + fn);
+                func();
+            }
+        }
+    };
+
+    String.prototype.replaceArray = function(find, replace) {
+        var replaceString = this;
+        var regex;
+        for(var i = 0; i < find.length; i++) {
+            regex = new RegExp(find[i], "g");
+            replaceString = replaceString.replace(regex, replace[i]);
+        }
+        return replaceString;
+    };
+
+    // jquery bindings
+    ux = $.fn.tooltip = $.uxtooltip = function(options) {
+        return this.each(function() {
+            var $el = $(this),
+                tooltip;
+
+            if($el.hasClass('uxitd-tooltip-ready')) {
+                return;
+            }
+
+            $el.addClass('uxitd-tooltip-ready');
+            tooltip = new Tooltip(this, options);
+        });
+    };
+
+    // update tooltip instance
+    ux.update = function(el) {
+        var $el;
+
+        if(el === undefined) {
+            $el = $(".uxitd-tooltip-ready");
+        }
+        else {
+            $el = $(el);
+        }
+
+        $el.each(function() {
+            var _instance = $(this).data('uxTooltip');
+
+            // remove previous instance data
+            $(this).removeData('uxTooltip');
+
+            // add new options
+            _instance.opts = $.extend({}, _instance.opts, $(this).data());
+
+            // register new instance data
+            $(this).data('uxTooltip', _instance);
+
+            $(this).off(events.click + ' ' + events.mouseenter + ' ' + events.mouseleave);
+
+            bindUIActions($(this));
+
+            callback(_instance.opts.onUpdate);
+        });
+    };
+
+    // remove tooltip binding instance
+    ux.remove = function(el) {
+        var $el;
+
+        if(el === undefined) {
+            $el = $(".uxitd-tooltip-ready");
+        }
+        else {
+            $el = $(el);
+        }
+
+        $el.each(function() {
+            var _this = $(this),
+                _instance = _this.data('uxTooltip');
+            // remove plugin data
+
+            _this.removeData('uxTooltip');
+            _this.removeData('tooltip');
+
+            // remove ready class
+            _this.removeClass('uxitd-tooltip-ready');
+
+            // remove plugin events
+            _this.off(events.click + ' ' + events.mouseenter + ' ' + events.mouseleave);
+
+            callback(_instance.opts.onDestroy);
+        });
+    };
+
+    // Version
+    ux.version = "1.2.0";
+
+    // settings
+    ux.settings = defaults;
+})(jQuery);
+
+
+/**
+ * UX Rocket
+ * jQuery based content rotator
+ * @author Bilal Cinarli
+ * @author Kursad Yildirmak (Version 0.2)
+ */
+;(function ($) {
+    var uxrotator = "uxrotator", // global shorthand
+        ux, // local shorthand
+
+        defaults = {
+            slides: '.slide',
+            current: 'current',
+            autoSlide: true,
+            slideDelay: 7000,
+            transition: 'none',
+            transitionSpeed: 750,
+            bullets: false
+        };
+
+
+    // constructor method
+    var Rotator = function (el, options) {
+        var opts = $.extend({}, defaults, options, $(el).data()),
+
+        // cached jQuery Objects
+            $slider = $(el),
+            $slides = $slider.find(opts.slides),
+            $next = $slider.find('.next'),
+            $prev = $slider.find('.prev'),
+            $currentOne,
+            $nextOne,
+
+        // cached Variables
+            timer,
+            currentSlide = 0,
+            nextSlide = 0,
+            totalSlides = 0,
+            bulletIndex = 0,
+            direction = 'next',
+            animating = false,
+            start = -100, // slides to left for 100%
+            end = 0;
+
+
+        $slides.addClass('rotator-slide').wrapAll('<div class="rotator-slides" />').hide().first().show().addClass(opts.current);
+        totalSlides = $slides.length;
+
+        //create bullets
+        if(opts.bullets == true && !$slider.find('.rotator-bullets').length){
+            var bullets = "";
+            for (var i=0;i<totalSlides;i++){
+                if(i==0){
+                    bullets += '<span class="bullet current">'+i+'</span>';
+                }else{
+                    bullets += '<span class="bullet">'+i+'</span>';
+                }
+            }
+            $slider.append('<div class="rotator-bullets">'+ bullets +'</div>');
+            var $bullet = $slider.find('.rotator-bullets').children('.bullet');
+        };
+
+        /**
+         * Slide functions
+         **/
+        var animate = function (slideIndex) {
+            if (animating === false) {
+                animating = true;
+
+                //go to slide if bullets is activated
+                if(typeof slideIndex != "undefined"){
+                    nextSlide = slideIndex;
+                    if(currentSlide > nextSlide){
+                        start = 100;
+                    }
+                }else{
+                    if (direction === 'next') {
+                        nextSlide = (nextSlide + 1 === totalSlides) ? 0 : nextSlide + 1;
+                    }
+                    if (direction === 'prev') {
+                        nextSlide = (nextSlide - 1 < 0) ? totalSlides - 1 : nextSlide - 1;
+                        start = 100; // slides to right for 100%
+                    }
+                }
+                $currentOne = $slides.filter(':eq(' + currentSlide + ')');
+                $nextOne = $slides.filter(':eq(' + nextSlide + ')');
+
+                if (opts.transition === 'horizontal') {
+                    $currentOne.animate({
+                        left: start + '%'
+                    }, opts.transitionSpeed, function () {
+                        $(this).hide();
+                    }).removeClass(opts.current);
+                    $nextOne.addClass(opts.current).css('left', -start + '%').show().animate({
+                        left: end
+                    }, opts.transitionSpeed);
+                } else if (opts.transition === 'vertical') {
+                    $currentOne.animate({
+                        top: start + '%'
+                    }, opts.transitionSpeed, function () {
+                        $(this).hide();
+                    }).removeClass(opts.current);
+                    $nextOne.addClass(opts.current).css('top', -start + '%').show().animate({
+                        top: end
+                    }, opts.transitionSpeed);
+                } else if (opts.transition === 'fade') {
+                    $currentOne.fadeOut(opts.transitionSpeed).removeClass(opts.current);
+                    $nextOne.addClass(opts.current).fadeIn(opts.transitionSpeed);
+                } else {
+                    $currentOne.hide().removeClass(opts.current);
+                    $nextOne.addClass(opts.current).show();
+                }
+
+                if(opts.bullets == true){
+                    $bullet.removeClass('current').eq($nextOne.index()).addClass('current');
+                }
+                // set the direction to default always for autoRun
+                direction = 'next';
+
+                // jump to next index
+                currentSlide = nextSlide;
+                start = -100;
+
+                animating = false;
+            }
+        };
+
+        var run = function () {
+            // make sure forwarding
+            direction = 'next';
+            timer = setInterval(animate, opts.slideDelay);
+        };
+
+        var stop = function () {
+            clearInterval(timer);
+        };
+
+        $next.on('click', function () {
+            stop();
+            direction = 'next';
+            animate();
+        });
+
+        $prev.on('click', function () {
+            stop();
+            direction = 'prev';
+            animate();
+        });
+
+        //bullet click event
+        if(opts.bullets == true){
+            $bullet.on('click', function(){
+                var activebullet = $(this).index();
+                $bullet.removeClass('current');
+                $(this).addClass('current');
+
+                if(bulletIndex != activebullet) {
+                    stop();
+                    animate(activebullet);
+                    bulletIndex = activebullet;
+                };
+            });
+        };
+
+
+        // Initialize  auto rotation
+        if (opts.autoSlide && totalSlides > 1) {
+            run();
+            $slider.hover(function () {
+                stop();
+            }, function () {
+                run();
+            });
+        }
+
+        return this;
+    };
+
+    // jquery bindings
+    ux = $.fn.rotator = $.uxrotator = function (options) {
+        return this.each(function () {
+            var $el = $(this),
+                rotator;
+
+            if($el.hasClass('uxitd-rotator-ready')){
+                return;
+            }
+
+            $el.addClass('uxitd-rotator-ready');
+
+            rotator = new Rotator(this, options);
+        });
+    };
+
+    // Version
+    ux.version = "0.3.0";
+
+    // settings
+    ux.settings = defaults;
+})(jQuery);
+
+/**
+ * UX Rocket
+ * jQuery based tooltip and popover
+ * @author Bilal Cinarli
+ * @author Rames Aliyev
+ */
+
+;(function($) {
+    var ux, // local shorthand
+
+        defaults = {
+            placement: 'top', // where the tooltip appear relative to element
+            position : 'center', // center|start|end centers the container or place it on the corner
+            template : '' +
+                       '<div {id} class="tooltip-pop {class}">' +
+                       '    <div class="tooltip-content">{content}</div>' +
+                       '    <div class="tooltip-arrow"></div>' +
+                       '</div>',
+            cssClass   : '',
+            id         : '',
+            showAnimate: false,
+            type       : 'tooltip', // tooltip | popover,
+
+            onReady  : false,
+            onOpen   : false,
+            onUpdate : false,
+            onClose  : false,
+            onRemove : false,
+            onDestroy: false
+        },
+        lastActiveTooltip = null,
+        events = {
+            click     : 'click.uxTooltip',
+            mouseenter: 'mouseenter.uxTooltip',
+            mouseleave: 'mouseleave.uxTooltip'
+        };
+
+    // constructor method
+    var Tooltip = function(el, options) {
+
+        var $el = $(el),
+            opts = $.extend({}, defaults, options, $el.data()),
+            dims = {},
+            title = $(el).attr('title');
+
+        //cached variables
+        var instance_opts = {
+            el     : $el,
+            title  : title,
+            timeout: null,
+            tmp    : null,
+            view   : false,
+            dims   : dims,
+            ttip   : null,
+            opts   : opts
+        };
+
+        if(typeof opts.content === 'undefined' || opts.content === null) {
+            if(typeof title !== 'undefined' && title !== '') {
+                opts.content = title;
+            }
+            else {
+                return;
+            }
+        }
+
+        $el.data('uxTooltip', instance_opts);
+        instance_opts.el.data("tooltip", true);
+
+        $(window).load(function() {
+            getPosition($el, dims);
+        });
+
+        callback(opts.onReady);
+
+        bindUIActions($el);
+    };
+
+    var bindUIActions = function($el) {
+        var _instance = $el.data('uxTooltip'),
+            opts = _instance.opts,
+            $ttip = _instance.$ttip,
+            showEvent = (opts.type === "popover" ? events.click : events.mouseenter + ' ' + events.mouseleave);
+
+        $el.on(showEvent, function(e) {
+            var active = $el.data("tooltip-active");
+
+            if(!active || !_instance.view) {
+                showTooltip(_instance);
+            } else {
+                hideTooltip(_instance);
+            }
+        });
+
+
+        $(document).on('click', function(e) {
+            var $target = $(e.target);
+
+            if($target.is('.tooltip-pop, .tooltip-pop *')) {
+                return;
+            }
+
+            $ttip = _instance.$ttip = $(".tooltip-pop");
+
+            var hasTooltip = $target.data("tooltip");
+
+            if(hasTooltip) {
+                lastActiveTooltip.el.data("tooltip-active", false);
+            } else if(typeof $ttip !== 'undefined' && $ttip.length > 0) {
+                if($ttip.hasClass("tooltip-popover")) {
+                    return;
+                }
+
+                hideTooltip(_instance);
+            }
+        });
+    };
+
+    var showTooltip = function(options) {
+        var opts = options.opts,
+            $el = options.el,
+            $ttip = options.ttip,
+            dims = options.dims;
+
+        lastActiveTooltip = options;
+        options.view = true;
+        options.el.data("tooltip-active", true);
+        options.timeout = setTimeout(function() {
+            options.tmp = createTooltip(options);
+            options.ttip = $ttip = $(".tooltip-pop");
+
+            getPosition($el, dims);
+
+            positionTooltip($ttip, dims, opts);
+
+            callback(opts.onOpen);
+
+            options.view = true;
+        }, 200);
+    };
+
+    var hideTooltip = function(options) {
+        var opts = options.opts,
+            view = options.view,
+            $ttip = options.ttip;
+
+        if(view === true && $ttip) {
+            $ttip.remove();
+            callback(opts.onRemove);
+        }
+
+        clearTimeout(options.timeout);
+        options.tmp = null;
+        options.view = false;
+        options.el.data("tooltip-active", false);
+    };
+
+    var closeButton = function(options) {
+        var opts = options.opts,
+            $ttip = options.ttip;
+
+        if(opts.type === 'tooltip') {
+            return;
+        }
+
+        $ttip.append('<a class="tooltip-close">X</a>');
+
+        $ttip.on('click', '.tooltip-close', function() {
+            $ttip.remove();
+            callback(opts.onClose);
+            callback(opts.onRemove);
+            options.view = false;
+        });
+    };
+
+    var createTooltip = function(options) {
+        var opts = options.opts,
+            tooltip = '',
+            content = '',
+            template = opts.template,
+            temp_content = opts.content,
+            obj_pattern = /^(\.|#)(-?[_a-zA-Z]+[_a-zA-Z0-9-]*)/,
+            url_pattern = /^(http|https|\/|\.\/|\.\.\/)/,
+            function_pattern = /^([^\d\s]([a-zA-Z0-9_]+))\((.*)?\)/g,
+            search_for = ['{id}', '{class}', '{content}'],
+            replace = $.extend({id: opts.id, cssClass: opts.cssClass, content: opts.content}, $(opts.el).data()),
+            replace_with,
+            popoverClass = '';
+
+        // After create callback.
+        var afterCreate = function() {
+            closeButton(options);
+        };
+
+        // css id
+        if(typeof opts.id !== 'undefined' && opts.id !== null) {
+            replace.id = opts.id;
+        }
+
+        // css class
+        if(typeof opts.cssClass !== 'undefined' && opts.cssClass !== null) {
+            replace.cssClass = opts.cssClass;
+        }
+
+        // check if content is an element in a page
+        if(obj_pattern.test(temp_content)) {
+            if($(temp_content).length === 1) {
+                replace.content = $(temp_content).html();
+            }
+        }
+
+        else if(url_pattern.test(temp_content)) {
+            replace.cssClass += ' preloading tooltip-ajax-content';
+            replace.content = "";
+
+            afterCreate = function(response) {
+            };
+
+            $.ajax({
+                url    : temp_content,
+                async  : true,
+                success: function(response) {
+                    afterPreloading(response, options);
+                }
+            });
+        }
+
+        else if(function_pattern.test(temp_content)) {
+            replace.cssClass += ' preloading';
+            replace.content = "";
+
+            var fn = temp_content.replace(function_pattern, "$1|$3").split("|");
+
+            afterCreate = function() {
+                content = temp_content;
+
+                if(typeof(window[fn[0]]) != 'undefined') {
+                    content = window[fn[0]](fn[1]);
+                }
+
+                afterPreloading(content, options);
+            };
+        }
+
+        if(opts.type === 'popover') {
+            popoverClass = ' tooltip-popover';
+        }
+
+        replace.cssClass += ' position-' + opts.position + ' placement-' + opts.placement + popoverClass;
+
+        replace_with = [replace.id, replace.cssClass, replace.content];
+        tooltip = template.replaceArray(search_for, replace_with);
+
+        $(".tooltip-pop").remove();
+        $('body').append(tooltip);
+
+        // Asyc call.
+        setTimeout(function() {
+            if(typeof afterCreate === "function") {
+                afterCreate();
+            }
+        }, 0);
+
+        return tooltip;
+    };
+
+    var afterPreloading = function(content, options) {
+        var el = options.el,
+            dims = options.dims,
+            opts = options.opts;
+
+        var tooltip = options.ttip = $(".tooltip-pop");
+        tooltip.removeClass("preloading");
+        tooltip.find(".tooltip-content").html(content);
+
+        closeButton(options);
+        getPosition(el, dims);
+        positionTooltip(tooltip, dims, opts);
+    };
+
+    var getPosition = function($el, dims) {
+        dims.offset = $el.offset();
+        dims.width = $el.outerWidth();
+        dims.height = $el.outerHeight();
+    };
+
+    var positionTooltip = function($tooltip, dims, options) {
+
+        // Correct width.
+        $tooltip.offset({top: -9999, left: -9999});
+
+        var $w = $tooltip.outerWidth(),
+            $h = $tooltip.outerHeight(),
+            top = dims.offset.top - ($h - dims.height) / 2, // default center
+            left = dims.offset.left - ($w - dims.width) / 2, // default center
+            arrow = $tooltip.find('.tooltip-arrow').height();
+
+        // get the top position
+        switch(options.placement) {
+            case 'top':
+                // Get proper margin bottom value.
+                var marginBottom = $tooltip.css('marginBottom');
+                marginBottom = marginBottom === "auto" ? 0 : marginBottom.replace("px", "");
+
+                top = dims.offset.top - $h - marginBottom;
+                if(options.position === 'end') {
+                    left = dims.offset.left + dims.width - $w;
+                }
+                else if(options.position === 'start') {
+                    left = dims.offset.left;
+                }
+                break;
+            case 'bottom':
+                top = dims.offset.top + dims.height + (arrow * 1.5);
+                if(options.position === 'end') {
+                    left = dims.offset.left + dims.width - $w;
+                }
+                else if(options.position === 'start') {
+                    left = dims.offset.left;
+                }
+                break;
+            case 'right':
+                left = dims.offset.left + dims.width;
+                if(options.position === 'end') {
+                    top = dims.offset.top - $h;
+                }
+                else if(options.position === 'start') {
+                    top = dims.offset.top;
+                }
+                break;
+            case 'left':
+                left = dims.offset.left - $w - (dims.width / 2);
+                if(options.position === 'end') {
+                    top = dims.offset.top + dims.height;
+                }
+                else if(options.position === 'start') {
+                    top = dims.offset.top;
+                }
+                break;
+            case 'center':
+                if(options.position === 'end') {
+                    top = dims.offset.top + (dims.height / 2);
+                    left = dims.offset.left - $w;
+                }
+                break;
+        }
+
+        // Round values.
+        top = Math.round(top);
+        left = Math.round(left);
+
+        $tooltip.offset({top: top, left: left});
+    };
+
+    // global callback
+    var callback = function(fn) {
+        // if callback string is function call it directly
+        if(typeof fn === 'function') {
+            fn.apply(this);
+        }
+
+        // if callback defined via data-attribute, call it via new Function
+        else {
+            if(fn !== false) {
+                var func = new Function('return ' + fn);
+                func();
+            }
+        }
+    };
+
+    String.prototype.replaceArray = function(find, replace) {
+        var replaceString = this;
+        var regex;
+        for(var i = 0; i < find.length; i++) {
+            regex = new RegExp(find[i], "g");
+            replaceString = replaceString.replace(regex, replace[i]);
+        }
+        return replaceString;
+    };
+
+    // jquery bindings
+    ux = $.fn.tooltip = $.uxtooltip = function(options) {
+        return this.each(function() {
+            var $el = $(this),
+                tooltip;
+
+            if($el.hasClass('uxitd-tooltip-ready')) {
+                return;
+            }
+
+            $el.addClass('uxitd-tooltip-ready');
+            tooltip = new Tooltip(this, options);
+        });
+    };
+
+    // update tooltip instance
+    ux.update = function(el) {
+        var $el;
+
+        if(el === undefined) {
+            $el = $(".uxitd-tooltip-ready");
+        }
+        else {
+            $el = $(el);
+        }
+
+        $el.each(function() {
+            var _instance = $(this).data('uxTooltip');
+
+            // remove previous instance data
+            $(this).removeData('uxTooltip');
+
+            // add new options
+            _instance.opts = $.extend({}, _instance.opts, $(this).data());
+
+            // register new instance data
+            $(this).data('uxTooltip', _instance);
+
+            $(this).off(events.click + ' ' + events.mouseenter + ' ' + events.mouseleave);
+
+            bindUIActions($(this));
+
+            callback(_instance.opts.onUpdate);
+        });
+    };
+
+    // remove tooltip binding instance
+    ux.remove = function(el) {
+        var $el;
+
+        if(el === undefined) {
+            $el = $(".uxitd-tooltip-ready");
+        }
+        else {
+            $el = $(el);
+        }
+
+        $el.each(function() {
+            var _this = $(this),
+                _instance = _this.data('uxTooltip');
+            // remove plugin data
+
+            _this.removeData('uxTooltip');
+            _this.removeData('tooltip');
+
+            // remove ready class
+            _this.removeClass('uxitd-tooltip-ready');
+
+            // remove plugin events
+            _this.off(events.click + ' ' + events.mouseenter + ' ' + events.mouseleave);
+
+            callback(_instance.opts.onDestroy);
+        });
+    };
+
+    // Version
+    ux.version = "1.2.0";
+
+    // settings
+    ux.settings = defaults;
+})(jQuery);
